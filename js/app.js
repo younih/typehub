@@ -102,6 +102,8 @@ function loadItem() {
   $('#practice-count').textContent = `${faNum(S.idx + 1)} / ${faNum(total)}`;
   $('#practice-bar').style.width = (S.idx / total * 100) + '%';
   $('#type-input').value = '';
+  $('#type-input').classList.remove('auto-ok');
+  S.doneOnce = false;
   $('#live-acc').textContent = '—';
   $('#btn-slow').classList.remove('on');
   S.slow = false; S.playsLeft = Server.maxPlays; S.t0 = null;
@@ -144,13 +146,14 @@ function renderChips(item, typed) {
   const box = $('#word-chips');
   const prev = box._st || [];
   box.innerHTML = '';
-  const targets = S.level.kind === 'letter' ? [item.en] : Engine.tokenize(item.en);
+  const display = S.level.kind === 'letter' ? [item.en] : Engine.tokenize(item.en);
+  const targets = display.map(Engine.normWord);
   const typedWords = typed.split(/\s+/).map(Engine.normWord);
   const now = [];
   targets.forEach((tw, i) => {
     const d = document.createElement('div');
     d.className = 'chip-w';
-    d.textContent = tw;
+    d.textContent = display[i];
     const yw = typedWords[i] || '';
     let st = '';
     if (yw !== '') {
@@ -229,6 +232,8 @@ function wordFa(item, enWord) {
 }
 
 function finishItem() {
+  if (!S || S.doneOnce) return; // ضد ثبت دوباره (اینتر سریع بعد از تشخیص خودکار)
+  S.doneOnce = true;
   const item = currentItem();
   const typed = $('#type-input').value;
   const secs = S.t0 ? (Date.now() - S.t0) / 1000 : 5;
