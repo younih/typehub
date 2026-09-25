@@ -1,9 +1,9 @@
-/* TypeHub Service Worker — آفلاین */
-const CACHE = 'typehub-v1';
+/* TypeHub Service Worker — آفلاین (فقط فایل‌های استاتیک؛ هرگز /api/ کش نمی‌شود) */
+const CACHE = 'typehub-v2';
 const FILES = [
-  './', './index.html',
+  './', './index.html', './app.html', './admin.html',
   './css/style.css',
-  './js/content.js', './js/engine.js', './js/app.js',
+  './js/content.js', './js/engine.js', './js/app.js', './js/auth.js',
   './manifest.json', './icons/icon.svg'
 ];
 self.addEventListener('install', (e) => {
@@ -15,10 +15,16 @@ self.addEventListener('activate', (e) => {
   ).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', (e) => {
+  var url = new URL(e.request.url);
+  // درخواست‌های بک‌اند همیشه مستقیم به شبکه می‌روند (وضعیت ورود نباید کش شود)
+  if (url.pathname.indexOf('/api/') === 0) return;
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-      const copy = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, copy)).catch(()=>{});
+      // فقط پاسخ‌های موفق GET کش می‌شوند
+      if (e.request.method === 'GET' && res && res.status === 200) {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy)).catch(()=>{});
+      }
       return res;
     }).catch(() => caches.match('./index.html')))
   );
