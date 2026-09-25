@@ -41,10 +41,21 @@
     <div class="hero">
       <h1>انگلیسی رو با <span class="hl">گوش</span> و <span class="hl">تایپ</span> یاد بگیر</h1>
       <p class="sub">از صفرِ صفر: اول الفبا، بعد کلمه، بعد جمله. صدا رو گوش بده، همزمان تایپ کن، نمره بگیر.</p>
-      <div class="hero-cta">
-        <button class="btn primary big" id="btn-continue">▶ ادامه یادگیری</button>
-        <button class="btn ghost" data-nav="levels">انتخاب سطح</button>
-        <button class="btn ghost" id="btn-placement">🎯 تعیین سطح</button>
+      <div class="hero-row">
+        <div class="goal-ring" title="هدف روزانه">
+          <svg viewBox="0 0 80 80" class="ring-svg">
+            <circle cx="40" cy="40" r="34" class="ring-bg"/>
+            <circle cx="40" cy="40" r="34" class="ring-fg" id="ring-fg"/>
+          </svg>
+          <div class="ring-center"><b id="goal-num">۰ / ۵</b><span>هدف امروز</span></div>
+        </div>
+        <div class="hero-cta">
+          <button class="btn primary big glow" id="btn-continue">▶ ادامه یادگیری</button>
+          <div class="hero-cta-row">
+            <button class="btn ghost" data-nav="levels">انتخاب سطح</button>
+            <button class="btn ghost" id="btn-placement">🎯 تعیین سطح</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="cards">
@@ -90,8 +101,8 @@
     <div class="audio-box">
       <button id="btn-play" class="btn-audio" aria-label="پخش صدا">🔊</button>
       <div class="audio-info">
-        <div class="audio-hint">گوش بده و تایپ کن…</div>
-        <div class="audio-plays"><span id="plays-left"></span> پخش باقی‌مونده</div>
+        <div class="audio-hint">🎤 گوش بده — کلمه‌ها با صدا روشن می‌شن</div>
+        <div class="audio-plays"><span id="plays-left"></span> پخش باقی‌مونده • همزمان تایپ کن ⌨️</div>
       </div>
       <button id="btn-slow" class="btn chip" aria-label="پخش آهسته">🐢 آهسته</button>
     </div>
@@ -106,6 +117,7 @@
     </div>
     <div class="live-score">
       <span>دقت لحظه‌ای: <b id="live-acc">—</b></span>
+      <span id="combo-pill" class="combo hidden">🔥 کمبو <b id="combo-n">۰</b></span>
     </div>
   </section>
 
@@ -144,6 +156,7 @@
       <div class="score-card"><div class="score-num" id="r-wpm">0</div><div class="score-label">کلمه در دقیقه</div></div>
       <div class="score-card"><div class="score-num" id="r-xp">+0</div><div class="score-label">امتیاز</div></div>
     </div>
+    <div id="r-combo" class="combo-line hidden"></div>
     <div id="result-words" class="result-words"></div>
     <div class="result-actions">
       <button id="btn-retry-wrong" class="btn primary">تمرین مجدد غلط‌ها 🔁</button>
