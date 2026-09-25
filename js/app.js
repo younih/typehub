@@ -19,7 +19,7 @@ const P = store.load();
 function show(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $('#screen-' + name).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.nav === name));
+  document.querySelectorAll('.tab, .tnav').forEach(t => t.classList.toggle('active', t.dataset.nav === name));
   window.scrollTo(0, 0);
   if (name === 'levels') renderLevels();
   if (name === 'stats') renderStats();
