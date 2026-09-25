@@ -15,7 +15,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TypeHub">
-<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 <div id="app">
@@ -44,17 +44,15 @@
     <div class="hero">
       <span class="kicker">یادگیری انگلیسی از صفر</span>
       <h1>اول <span class="hl">گوش</span> بده.<br>بعد، دقیق <span class="hl">تایپ</span> کن.</h1>
-      <p class="sub">مدل شنیدار + تایپ: صدای انگلیسی پخش می‌شه، تو همزمان کلمه‌به‌کلمه تایپ می‌کنی و نمره می‌گیری.</p>
+      <p class="sub">مدل شنیدار + تایپ: صدای انگلیسی پخش می‌شه، تو هر چی شنیدی رو توی جاهای خالی می‌نویسی و نمره می‌گیری.</p>
     </div>
 
     <div class="demo-card">
       <div class="demo-title">🎧 گوش کن و بنویس — یه نمونه ببین</div>
-      <div class="demo-words" id="demo-words">
-        <span class="demo-word done">sheep</span>
-        <span class="demo-word"><span class="caret"></span>ship</span>
-      </div>
+      <div class="demo-hintline en" dir="ltr">s····&nbsp;&nbsp;&nbsp;s···</div>
+      <div class="demo-blanks" dir="ltr"><span class="demo-blank"></span><span class="demo-blank"></span></div>
       <button class="demo-play" id="demo-play">🔊 پخش نمونه</button>
-      <div class="demo-hint">صدا رو گوش بده و هر کلمه رو دقیق تایپ کن — مثل همین</div>
+      <div class="demo-hint">متن مخفیه! فقط از حروف اول و طول کلمات کمک بگیر</div>
     </div>
 
     <div class="hero-cta">
@@ -99,9 +97,9 @@
       <h3>چطور کار می‌کنه؟</h3>
       <div class="how-steps">
         <div class="how-step"><span class="n">۱</span><span>🔊 صدای انگلیسی پخش می‌شه <b>(متن مخفیه!)</b></span></div>
-        <div class="how-step"><span class="n">۲</span><span>⌨️ هر چی شنیدی رو <b>کلمه‌به‌کلمه</b> تایپ کن</span></div>
-        <div class="how-step"><span class="n">۳</span><span>✅ هر کلمه لحظه‌ای <b>سبز یا قرمز</b> می‌شه؛ کمبو جمع کن 🔥</span></div>
-        <div class="how-step"><span class="n">۴</span><span>🇮🇷 آخرش <b>معنی فارسی</b> همه کلمات رو می‌بینی و نمره می‌گیری</span></div>
+        <div class="how-step"><span class="n">۲</span><span>⌨️ هر چی شنیدی رو توی <b>جاهای خالی</b> بنویس — از حروف اول کمک بگیر</span></div>
+        <div class="how-step"><span class="n">۳</span><span>✅ آخرش <b>نمره</b> می‌گیری؛ 💡 راهنمایی و 👁 نمایش جواب کمبو رو می‌شکنه</span></div>
+        <div class="how-step"><span class="n">۴</span><span>🇮🇷 <b>معنی فارسی</b> همه کلمات رو می‌بینی و Perfect جمع می‌کنی 🔥</span></div>
       </div>
     </div>
 
@@ -126,34 +124,38 @@
       <div id="practice-count" class="practice-count"></div>
     </div>
 
+    <div class="psess">
+      <span class="psess-item">⏱ <b id="sess-time">۰۰:۰۰</b></span>
+      <span class="psess-item">⭐ <b id="sess-score">۰</b></span>
+      <span class="psess-item">🔥 <b id="sess-combo">۰</b></span>
+    </div>
+
     <div class="train-card">
       <div class="train-title">🎧 گوش کن و بنویس</div>
       <div class="audio-row">
-        <button id="btn-play" class="btn-audio" aria-label="پخش صدا">🔊</button>
+        <button id="btn-play" class="btn-audio" aria-label="پخش مجدد">🔊</button>
         <div class="audio-info">
-          <div class="audio-hint">گوش بده — کلمه‌ها با صدا روشن می‌شن</div>
-          <div class="audio-plays"><b id="plays-left">۳</b> پخش باقی‌مونده • همزمان تایپ کن ⌨️</div>
+          <div class="audio-hint">گوش بده و هر چی شنیدی بنویس</div>
+          <div class="audio-plays"><b id="plays-left">۳</b> پخش باقی‌مونده</div>
         </div>
         <button id="btn-slow" class="btn-slow" aria-label="پخش آهسته">🐢 آهسته</button>
       </div>
-      <div id="word-slots" class="word-slots"></div>
-    </div>
-
-    <div class="type-wrap">
-      <input id="type-input" class="type-input" type="text" placeholder="هر چی شنیدی رو اینجا تایپ کن…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+      <div id="hint-line" class="hint-line"></div>
+      <div id="blank-row" class="blank-row"></div>
+      <div class="blank-note">از حروف اول و طول کلمات کمک بگیر • علائم نگارشی لازم نیست<br>Space: کلمه‌ی بعد • Enter: ثبت</div>
     </div>
 
     <div class="kb-row">
-      <div class="live-line">
-        <span>دقت لحظه‌ای: <b id="live-acc">—</b></span>
-        <span id="combo-pill" class="combo hidden">🔥 کمبو <b id="combo-n">۰</b></span>
+      <div class="tool-btns">
+        <button id="btn-hint" class="tool-btn">💡 راهنمایی</button>
+        <button id="btn-reveal" class="tool-btn">👁 نمایش جواب</button>
       </div>
       <button id="kb-toggle" class="kb-toggle">⌨️ کیبورد</button>
     </div>
     <div id="osk" class="osk hidden"></div>
 
     <div class="practice-actions">
-      <button id="btn-check" class="btn coral">ثبت و نمره ✓</button>
+      <button id="btn-check" class="btn coral">ثبت ✓</button>
       <button id="btn-skip" class="btn ghost">رد شدن ←</button>
     </div>
   </section>
@@ -168,23 +170,21 @@
       </div>
       <div id="place-count" class="practice-count"></div>
     </div>
-    <p class="page-sub">۶ سؤال شنیداری — هر چی شنیدی رو تایپ کن. آخرش سطح مناسب خودت رو پیشنهاد می‌دم.</p>
+    <p class="page-sub">۶ سؤال شنیداری — هر چی شنیدی رو بنویس. آخرش سطح مناسب خودت رو پیشنهاد می‌دم.</p>
 
     <div class="train-card">
       <div class="train-title">🎧 گوش کن و بنویس</div>
       <div class="audio-row">
-        <button id="place-play" class="btn-audio" aria-label="پخش صدا">🔊</button>
+        <button id="place-play" class="btn-audio" aria-label="پخش مجدد">🔊</button>
         <div class="audio-info">
-          <div class="audio-hint">گوش بده و تایپ کن…</div>
+          <div class="audio-hint">گوش بده و بنویس…</div>
           <div class="audio-plays"><b id="place-plays">۲</b> پخش باقی‌مونده</div>
         </div>
         <button id="place-slow" class="btn-slow" aria-label="پخش آهسته">🐢 آهسته</button>
       </div>
-      <div id="place-slots" class="word-slots"></div>
-    </div>
-
-    <div class="type-wrap">
-      <input id="place-input" class="type-input" type="text" placeholder="هر چی شنیدی رو اینجا تایپ کن…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr">
+      <div id="place-hint" class="hint-line"></div>
+      <div id="place-blanks" class="blank-row"></div>
+      <div class="blank-note">علائم نگارشی لازم نیست • Space: کلمه‌ی بعد • Enter: ثبت</div>
     </div>
 
     <div class="kb-row">
@@ -194,7 +194,8 @@
     <div id="place-osk" class="osk hidden"></div>
 
     <div class="practice-actions">
-      <button id="place-skip" class="btn ghost" style="flex:1">نمی‌دانم ⏭</button>
+      <button id="place-check" class="btn coral">ثبت ✓</button>
+      <button id="place-skip" class="btn ghost">نمی‌دانم ⏭</button>
     </div>
     <div id="place-result" class="place-result hidden"></div>
   </section>
@@ -203,6 +204,7 @@
   <section id="screen-result" class="screen">
     <div class="result-hero">
       <h2 id="result-title">کارنامه 🎉</h2>
+      <div id="perfect-ribbon" class="perfect-ribbon hidden"></div>
       <div class="score-grid">
         <div class="score-card"><div class="num" id="r-acc">۰٪</div><div class="lbl">دقت</div></div>
         <div class="score-card"><div class="num" id="r-wpm">۰</div><div class="lbl">کلمه در دقیقه</div></div>
@@ -212,10 +214,11 @@
     </div>
     <div id="result-words" class="result-words"></div>
     <div class="result-actions">
-      <button id="btn-retry-wrong" class="btn coral">تمرین مجدد غلط‌ها 🔁</button>
-      <button id="btn-next" class="btn ghost">مورد بعدی ←</button>
-      <button class="btn ghost" data-nav="levels">انتخاب سطح</button>
+      <button id="btn-next" class="btn coral big">تمرین بعدی ←</button>
+      <button id="btn-replay" class="btn ghost">🔊 پخش مجدد</button>
+      <button id="btn-retry-wrong" class="btn ghost">تمرین غلط‌ها 🔁</button>
     </div>
+    <div class="result-tip">Enter یا Space هم می‌ره سراغ تمرین بعدی</div>
   </section>
 
   <!-- ===== خطاها ===== -->
@@ -245,10 +248,11 @@
     <div class="help-card">
       <h4>⌨️ چطور سریع‌تر تایپ کنم؟</h4>
       <ol>
-        <li>اول <b>گوش بده</b>، بعد تایپ کن — عجله نکن.</li>
+        <li>اول <b>گوش بده</b>، بعد بنویس — عجله نکن.</li>
+        <li>با <b>Space</b> می‌ری سراغ کلمه‌ی بعد، با <b>Enter</b> ثبت می‌کنی.</li>
         <li>اگه کیبورد گوشیت سخته، دکمه <b>⌨️ کیبورد</b> رو بزن تا کیبورد داخل برنامه بیاد.</li>
         <li>دکمه <b>🐢 آهسته</b> یک بار پخش اضافه هم بهت می‌ده.</li>
-        <li>کلمات درست پشت‌سرهم = <b>کمبو 🔥</b> و امتیاز اضافه!</li>
+        <li>تمرین‌های کامل پشت‌سرهم = <b>Perfect 🔥</b> و بونوس امتیاز! ولی 💡 راهنمایی و 👁 نمایش جواب کمبو رو می‌شکنه.</li>
       </ol>
     </div>
     <div class="help-card">
@@ -275,10 +279,10 @@
   </nav>
 </div>
 
-<script src="js/content.js?v=7"></script>
-<script src="js/engine.js?v=7"></script>
-<script src="js/auth.js?v=7"></script>
-<script src="js/app.js?v=7"></script>
+<script src="js/content.js?v=8"></script>
+<script src="js/engine.js?v=8"></script>
+<script src="js/auth.js?v=8"></script>
+<script src="js/app.js?v=8"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
