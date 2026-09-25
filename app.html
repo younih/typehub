@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>TypeHub | تایپ‌هاب — اول گوش بده، بعد دقیق تایپ کن</title>
 <meta name="description" content="یادگیری انگلیسی از صفر با مدل شنیدار + تایپ: گوش بده، تایپ کن، نمره بگیر">
-<meta name="theme-color" content="#faf7f1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0f172a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Vazirmatn:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -13,9 +14,9 @@
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="apple-touch-icon" href="icons/icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TypeHub">
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 <div id="app">
@@ -27,8 +28,8 @@
       <span class="brand-name">تایپ‌هاب<span class="lat">TYPEHUB</span></span>
     </div>
     <div class="top-stats">
-      <span class="pill" id="pill-xp" title="امتیاز">⭐ <b>۰</b></span>
-      <span class="pill" id="pill-streak" title="استریک روزانه">🔥 <b>۰</b></span>
+      <span class="badge streak" title="استریک روزانه">🔥 <b id="pill-streak-n">۰</b></span>
+      <span class="badge xp" title="امتیاز">⭐ <b id="pill-xp-n">۰</b></span>
       <span id="auth-area"></span>
     </div>
   </header>
@@ -39,24 +40,25 @@
     <a href="index.html">ورود / ثبت‌نام برای همگام‌سازی ☁️</a>
   </div>
 
-  <!-- ===== خانه / تمرین ===== -->
+  <!-- ===== خانه ===== -->
   <section id="screen-home" class="screen active">
     <div class="hero">
       <span class="kicker">یادگیری انگلیسی از صفر</span>
       <h1>اول <span class="hl">گوش</span> بده.<br>بعد، دقیق <span class="hl">تایپ</span> کن.</h1>
-      <p class="sub">مدل شنیدار + تایپ: صدای انگلیسی پخش می‌شه، تو هر چی شنیدی رو توی جاهای خالی می‌نویسی و نمره می‌گیری.</p>
+      <p class="sub">صدای انگلیسی پخش می‌شه، تو حرف‌به‌حرف تایپ می‌کنی و لحظه‌ای فیدبک می‌گیری.</p>
     </div>
 
     <div class="demo-card">
       <div class="demo-title">🎧 گوش کن و بنویس — یه نمونه ببین</div>
-      <div class="demo-hintline en" dir="ltr">s····&nbsp;&nbsp;&nbsp;s···</div>
-      <div class="demo-blanks" dir="ltr"><span class="demo-blank"></span><span class="demo-blank"></span></div>
-      <button class="demo-play" id="demo-play">🔊 پخش نمونه</button>
-      <div class="demo-hint">متن مخفیه! فقط از حروف اول و طول کلمات کمک بگیر</div>
+      <div class="demo-pills" dir="ltr">
+        <div class="pword"><span class="pch ok">s</span><span class="pch ok">h</span><span class="pch ok">e</span><span class="pch cur"></span><span class="pch"></span></div>
+      </div>
+      <button class="demo-play" id="demo-play">▶ پخش نمونه</button>
+      <div class="demo-hint">متن مخفیه! فقط گوش بده و تایپ کن</div>
     </div>
 
     <div class="hero-cta">
-      <button class="btn coral big" id="btn-start-zero">شروع از سطح صفر 🚀</button>
+      <button class="btn grad big" id="btn-start-zero">شروع از سطح صفر 🚀</button>
       <div class="hero-cta-row">
         <button class="btn ghost" id="btn-continue">▶ ادامه یادگیری</button>
         <button class="btn ghost" id="btn-placement">🎯 تعیین سطح</button>
@@ -96,10 +98,10 @@
     <div class="how">
       <h3>چطور کار می‌کنه؟</h3>
       <div class="how-steps">
-        <div class="how-step"><span class="n">۱</span><span>🔊 صدای انگلیسی پخش می‌شه <b>(متن مخفیه!)</b></span></div>
-        <div class="how-step"><span class="n">۲</span><span>⌨️ هر چی شنیدی رو توی <b>جاهای خالی</b> بنویس — از حروف اول کمک بگیر</span></div>
-        <div class="how-step"><span class="n">۳</span><span>✅ آخرش <b>نمره</b> می‌گیری؛ 💡 راهنمایی و 👁 نمایش جواب کمبو رو می‌شکنه</span></div>
-        <div class="how-step"><span class="n">۴</span><span>🇮🇷 <b>معنی فارسی</b> همه کلمات رو می‌بینی و Perfect جمع می‌کنی 🔥</span></div>
+        <div class="how-step"><span class="n">۱</span><span>🎧 صدای انگلیسی پخش می‌شه <b>(متن مخفیه!)</b></span></div>
+        <div class="how-step"><span class="n">۲</span><span>⌨️ هر چی شنیدی رو <b>حرف‌به‌حرف</b> تایپ کن — درست سبز می‌شه، غلط قرمز</span></div>
+        <div class="how-step"><span class="n">۳</span><span>⚡ با <kbd>Space</kbd> می‌ری کلمه‌ی بعد، با <kbd>Enter</kbd> ثبت می‌کنی</span></div>
+        <div class="how-step"><span class="n">۴</span><span>🔥 تمرین‌های کامل پشت‌سرهم = <b>Perfect</b> و بونوس کمبو!</span></div>
       </div>
     </div>
 
@@ -127,36 +129,35 @@
     <div class="psess">
       <span class="psess-item">⏱ <b id="sess-time">۰۰:۰۰</b></span>
       <span class="psess-item">⭐ <b id="sess-score">۰</b></span>
-      <span class="psess-item">🔥 <b id="sess-combo">۰</b></span>
+      <span class="psess-item hot">🔥 <b id="sess-combo">۰</b></span>
     </div>
 
     <div class="train-card">
       <div class="train-title">🎧 گوش کن و بنویس</div>
-      <div class="audio-row">
-        <button id="btn-play" class="btn-audio" aria-label="پخش مجدد">🔊</button>
-        <div class="audio-info">
-          <div class="audio-hint">گوش بده و هر چی شنیدی بنویس</div>
-          <div class="audio-plays"><b id="plays-left">۳</b> پخش باقی‌مونده</div>
-        </div>
-        <button id="btn-slow" class="btn-slow" aria-label="پخش آهسته">🐢 آهسته</button>
+      <div class="player-row">
+        <button id="btn-play" class="btn-play" aria-label="پخش صدا">▶</button>
+        <div class="wave" id="wave" aria-hidden="true"></div>
       </div>
-      <div id="hint-line" class="hint-line"></div>
-      <div id="blank-row" class="blank-row"></div>
-      <div class="blank-note">از حروف اول و طول کلمات کمک بگیر • علائم نگارشی لازم نیست<br>Space: کلمه‌ی بعد • Enter: ثبت</div>
+      <div class="player-sub">
+        <span class="plays-tag"><b id="plays-left">۳</b> پخش باقی‌مانده</span>
+        <span class="plays-tag">دقت لحظه‌ای: <b id="live-acc">—</b></span>
+        <button id="btn-slow" class="slow-toggle" aria-label="پخش آهسته">آهسته 0.75x</button>
+      </div>
+      <div id="pill-row" class="pill-row" dir="ltr"></div>
+      <input id="type-hidden" class="type-hidden" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="ورودی تایپ">
+      <div class="pill-note"><kbd>Space</kbd> کلمه‌ی بعد • <kbd>Enter</kbd> ثبت • <kbd>Esc</kbd> رد شدن • علائم نگارشی لازم نیست</div>
     </div>
 
-    <div class="kb-row">
-      <div class="tool-btns">
-        <button id="btn-hint" class="tool-btn">💡 راهنمایی</button>
-        <button id="btn-reveal" class="tool-btn">👁 نمایش جواب</button>
-      </div>
-      <button id="kb-toggle" class="kb-toggle">⌨️ کیبورد</button>
+    <div class="tool-row">
+      <button id="btn-hint" class="tool-btn">💡 راهنمایی</button>
+      <button id="btn-reveal" class="tool-btn">👁 نمایش جواب</button>
+      <button id="kb-toggle" class="tool-btn">⌨️ کیبورد</button>
     </div>
     <div id="osk" class="osk hidden"></div>
 
-    <div class="practice-actions">
-      <button id="btn-check" class="btn coral">ثبت ✓</button>
-      <button id="btn-skip" class="btn ghost">رد شدن ←</button>
+    <div class="actions-row">
+      <button id="btn-check" class="act-pill ok">✓ ثبت <span class="kbd">Enter</span></button>
+      <button id="btn-skip" class="act-pill smoke">رد شدن <span class="kbd">Esc</span></button>
     </div>
   </section>
 
@@ -170,32 +171,31 @@
       </div>
       <div id="place-count" class="practice-count"></div>
     </div>
-    <p class="page-sub">۶ سؤال شنیداری — هر چی شنیدی رو بنویس. آخرش سطح مناسب خودت رو پیشنهاد می‌دم.</p>
+    <p class="page-sub">۶ سؤال شنیداری — هر چی شنیدی رو تایپ کن. آخرش سطح مناسب خودت رو پیشنهاد می‌دم.</p>
 
     <div class="train-card">
       <div class="train-title">🎧 گوش کن و بنویس</div>
-      <div class="audio-row">
-        <button id="place-play" class="btn-audio" aria-label="پخش مجدد">🔊</button>
-        <div class="audio-info">
-          <div class="audio-hint">گوش بده و بنویس…</div>
-          <div class="audio-plays"><b id="place-plays">۲</b> پخش باقی‌مونده</div>
-        </div>
-        <button id="place-slow" class="btn-slow" aria-label="پخش آهسته">🐢 آهسته</button>
+      <div class="player-row">
+        <button id="place-play" class="btn-play" aria-label="پخش صدا">▶</button>
+        <div class="wave" id="place-wave" aria-hidden="true"></div>
       </div>
-      <div id="place-hint" class="hint-line"></div>
-      <div id="place-blanks" class="blank-row"></div>
-      <div class="blank-note">علائم نگارشی لازم نیست • Space: کلمه‌ی بعد • Enter: ثبت</div>
+      <div class="player-sub">
+        <span class="plays-tag"><b id="place-plays">۲</b> پخش باقی‌مانده</span>
+        <button id="place-slow" class="slow-toggle" aria-label="پخش آهسته">آهسته 0.75x</button>
+      </div>
+      <div id="place-pills" class="pill-row" dir="ltr"></div>
+      <input id="place-hidden" class="type-hidden" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="ورودی تایپ">
+      <div class="pill-note"><kbd>Space</kbd> کلمه‌ی بعد • <kbd>Enter</kbd> ثبت</div>
     </div>
 
-    <div class="kb-row">
-      <div class="live-line"><span>نمی‌دونی؟ ردش کن 👇</span></div>
-      <button id="place-kb-toggle" class="kb-toggle">⌨️ کیبورد</button>
+    <div class="tool-row">
+      <button id="place-kb-toggle" class="tool-btn">⌨️ کیبورد</button>
     </div>
     <div id="place-osk" class="osk hidden"></div>
 
-    <div class="practice-actions">
-      <button id="place-check" class="btn coral">ثبت ✓</button>
-      <button id="place-skip" class="btn ghost">نمی‌دانم ⏭</button>
+    <div class="actions-row">
+      <button id="place-check" class="act-pill ok">✓ ثبت <span class="kbd">Enter</span></button>
+      <button id="place-skip" class="act-pill smoke">نمی‌دانم <span class="kbd">Esc</span></button>
     </div>
     <div id="place-result" class="place-result hidden"></div>
   </section>
@@ -206,7 +206,7 @@
       <h2 id="result-title">کارنامه 🎉</h2>
       <div id="perfect-ribbon" class="perfect-ribbon hidden"></div>
       <div class="score-grid">
-        <div class="score-card"><div class="num" id="r-acc">۰٪</div><div class="lbl">دقت</div></div>
+        <div class="score-card hl"><div class="num" id="r-acc">۰٪</div><div class="lbl">دقت</div></div>
         <div class="score-card"><div class="num" id="r-wpm">۰</div><div class="lbl">کلمه در دقیقه</div></div>
         <div class="score-card"><div class="num" id="r-xp">+۰</div><div class="lbl">امتیاز</div></div>
       </div>
@@ -214,8 +214,8 @@
     </div>
     <div id="result-words" class="result-words"></div>
     <div class="result-actions">
-      <button id="btn-next" class="btn coral big">تمرین بعدی ←</button>
-      <button id="btn-replay" class="btn ghost">🔊 پخش مجدد</button>
+      <button id="btn-next" class="btn grad big">تمرین بعدی ←</button>
+      <button id="btn-replay" class="btn ghost">🎧 پخش مجدد</button>
       <button id="btn-retry-wrong" class="btn ghost">تمرین غلط‌ها 🔁</button>
     </div>
     <div class="result-tip">Enter یا Space هم می‌ره سراغ تمرین بعدی</div>
@@ -227,7 +227,7 @@
     <p class="page-sub">کلماتی که اشتباه تایپ کردی، اینجا برای مرور ذخیره می‌شن.</p>
     <div id="review-list" class="review-list"></div>
     <div class="result-actions">
-      <button id="btn-review-practice" class="btn coral">تمرین همین کلمات ⌨️</button>
+      <button id="btn-review-practice" class="btn grad big">تمرین همین کلمات ⌨️</button>
       <button id="btn-review-clear" class="btn ghost danger">پاک کردن همه</button>
     </div>
   </section>
@@ -249,9 +249,10 @@
       <h4>⌨️ چطور سریع‌تر تایپ کنم؟</h4>
       <ol>
         <li>اول <b>گوش بده</b>، بعد بنویس — عجله نکن.</li>
-        <li>با <b>Space</b> می‌ری سراغ کلمه‌ی بعد، با <b>Enter</b> ثبت می‌کنی.</li>
+        <li>حرف درست <b>سبز</b> می‌شه، حرف غلط <b>قرمز</b> با لرزش.</li>
+        <li>با <kbd>Space</kbd> می‌ری سراغ کلمه‌ی بعد، با <kbd>Enter</kbd> ثبت می‌کنی، با <kbd>Esc</kbd> رد می‌کنی.</li>
         <li>اگه کیبورد گوشیت سخته، دکمه <b>⌨️ کیبورد</b> رو بزن تا کیبورد داخل برنامه بیاد.</li>
-        <li>دکمه <b>🐢 آهسته</b> یک بار پخش اضافه هم بهت می‌ده.</li>
+        <li>دکمه <b>آهسته 0.75x</b> سرعت پخش رو کم می‌کنه.</li>
         <li>تمرین‌های کامل پشت‌سرهم = <b>Perfect 🔥</b> و بونوس امتیاز! ولی 💡 راهنمایی و 👁 نمایش جواب کمبو رو می‌شکنه.</li>
       </ol>
     </div>
@@ -272,17 +273,29 @@
 
   <!-- ===== ناوبری پایین ===== -->
   <nav id="tabbar">
-    <button data-nav="home" class="tab active"><span class="ti">✍️</span><span>تمرین</span></button>
-    <button data-nav="levels" class="tab"><span class="ti">🗺️</span><span>مسیر</span></button>
-    <button data-nav="review" class="tab"><span class="ti">📝</span><span>خطاها</span></button>
-    <button data-nav="stats" class="tab"><span class="ti">💡</span><span>راهنما</span></button>
+    <button data-nav="home" class="tab active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span>تمرین</span>
+    </button>
+    <button data-nav="levels" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+      <span>مسیر</span>
+    </button>
+    <button data-nav="review" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      <span>خطاها</span>
+    </button>
+    <button data-nav="stats" class="tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>راهنما</span>
+    </button>
   </nav>
 </div>
 
-<script src="js/content.js?v=8"></script>
-<script src="js/engine.js?v=8"></script>
-<script src="js/auth.js?v=8"></script>
-<script src="js/app.js?v=8"></script>
+<script src="js/content.js?v=9"></script>
+<script src="js/engine.js?v=9"></script>
+<script src="js/auth.js?v=9"></script>
+<script src="js/app.js?v=9"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
