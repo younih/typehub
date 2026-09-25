@@ -38,6 +38,74 @@ const Engine = (() => {
   }
   function stopSpeak() {
     if ('speechSynthesis' in window) speechSynthesis.cancel();
+    karaokeSeq++; // باطل کردن تایمرهای کارائوکه قبلی
+  }
+
+  /* ---------- کارائوکه: هایلایت زنده کلمه هم‌زمان با پخش صدا ---------- */
+  // نگاشت کلمات به بازه کاراکتری در متن خام (برای رویداد boundary)
+  function wordSpans(text) {
+    const spans = [];
+    const re = /\S+/g;
+    let m;
+    while ((m = re.exec(text)) !== null) spans.push({ word: m[0], start: m.index, end: m.index + m[0].length });
+    return spans;
+  }
+  // نزدیک‌ترین کلمه به موقعیت کاراکتر (فاصله/علائم بعد از کلمه به همان کلمه می‌چسبند)
+  function wordIndexAt(spans, ci) {
+    for (let i = 0; i < spans.length; i++) {
+      if (ci <= spans[i].end) return i;
+    }
+    return spans.length - 1;
+  }
+  let karaokeSeq = 0;
+  function speakKaraoke(text, { slow = false, onWord = null, onend = null } = {}) {
+    return new Promise((resolve) => {
+      if (!('speechSynthesis' in window)) { resolve(); return; }
+      const mySeq = ++karaokeSeq;
+      const alive = () => mySeq === karaokeSeq;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice();
+      if (v) u.voice = v;
+      u.lang = 'en-US';
+      const rate = slow ? 0.6 : 0.92;
+      u.rate = rate;
+      u.pitch = 1;
+      const spans = wordSpans(text);
+      let cur = -1, heard = false, done = false;
+      const timers = [];
+      const later = (fn, ms) => { const t = setTimeout(() => { if (alive() && !done) fn(); }, ms); timers.push(t); };
+      const emit = (i) => {
+        if (i === cur || i < 0 || i >= spans.length) return;
+        cur = i;
+        try { onWord && onWord(i); } catch (e) {}
+      };
+      u.onboundary = (e) => {
+        if (e.charIndex === undefined || e.charIndex === null) return;
+        heard = true;
+        emit(wordIndexAt(spans, e.charIndex));
+      };
+      // اگر صدا/مرورگر boundary نفرستاد: تخمین زمانیِ یکنواخت
+      const startFallback = () => {
+        const perWord = 470 / rate;
+        const t0 = Date.now() + 200;
+        spans.forEach((s, i) => {
+          later(() => { if (!heard) emit(i); }, Math.max(0, t0 - Date.now() + i * perWord));
+        });
+      };
+      const fin = () => {
+        if (!alive() || done) return;
+        done = true;
+        timers.forEach(clearTimeout);
+        try { onend && onend(); } catch (e) {}
+        resolve();
+      };
+      u.onend = fin;
+      u.onerror = fin;
+      later(startFallback, 400); // کمی بعد از شروع واقعی پخش
+      later(fin, Math.max(6000, spans.length * (700 / rate) + 3000)); // failsafe کلی
+      speechSynthesis.speak(u);
+    });
   }
 
   /* ---------- نرمال‌سازی و مقایسه ---------- */
@@ -94,5 +162,5 @@ const Engine = (() => {
     return new Date().toISOString().slice(0, 10);
   }
 
-  return { speak, stopSpeak, checkWords, liveAccuracy, score, shuffle, todayKey, normWord, tokenize };
+  return { speak, speakKaraoke, stopSpeak, checkWords, liveAccuracy, score, shuffle, todayKey, normWord, tokenize, wordSpans, wordIndexAt };
 })();
