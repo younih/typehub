@@ -147,6 +147,12 @@ cat <<EOF
         proxy_read_timeout 120s;
     }
 
+    # Service Worker: هرگز کش نشود، وگرنه آپدیت‌ها روی گوشی گیر می‌کنند
+    location = /sw.js {
+        expires -1;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+    }
+
     location / {
         try_files \$uri \$uri/ =404;
     }
