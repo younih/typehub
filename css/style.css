@@ -31,6 +31,9 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;color-scheme:dark}
+/* ایمنی موبایل: هیچ عنصری نباید باعث اسکرول افقی صفحه شود (clip برخلاف hidden، sticky را نمی‌شکند) */
+html,body{overflow-x:clip}
+@supports not (overflow-x:clip){html,body{overflow-x:hidden}}
 body{
   font-family:var(--font-fa);
   background:radial-gradient(900px 420px at 50% -80px,rgba(167,139,250,.08),transparent 60%),var(--bg);
@@ -324,7 +327,7 @@ input{font-family:inherit}
 /* کپسول‌های حروف (قلب تمرین) */
 .pill-row{
   display:flex;flex-wrap:wrap;gap:14px 18px;justify-content:center;direction:ltr;
-  position:relative;margin-bottom:6px;min-height:56px;cursor:text;
+  position:relative;margin-bottom:6px;min-height:56px;cursor:text;max-width:100%;
 }
 .pword{display:inline-flex;gap:6px;cursor:text;flex-shrink:0;white-space:nowrap;flex-wrap:nowrap}
 .pch{
@@ -427,16 +430,17 @@ input{font-family:inherit}
   background:var(--glass);border:1px solid var(--glass-brd);border-radius:var(--radius);
   backdrop-filter:blur(12px);box-shadow:var(--shadow);padding:20px 16px 14px;margin-bottom:14px;
 }
-.pwords{display:flex;flex-wrap:wrap;gap:12px 18px;justify-content:center;direction:ltr;margin-bottom:12px}
-.rword{display:flex;flex-direction:column;align-items:center;min-width:54px}
+.pwords{display:flex;flex-wrap:wrap;gap:12px 18px;justify-content:center;direction:ltr;margin-bottom:12px;max-width:100%}
+.rword{display:flex;flex-direction:column;align-items:center;min-width:0;max-width:100%}
 .rword .en{
   font-family:var(--font-en);font-size:22px;font-weight:700;direction:ltr;color:var(--ink);
   border-bottom:2.5px solid rgba(255,255,255,.15);padding-bottom:3px;
+  max-width:100%;overflow-wrap:anywhere;text-align:center;
 }
 .rword.bad .en{color:var(--bad);border-bottom-color:var(--bad);text-shadow:0 0 10px var(--bad-glow)}
-.rword .typed{font-family:var(--font-en);font-size:12px;color:var(--bad);direction:ltr;margin-top:2px}
-.rword .fa{font-size:12px;color:var(--muted);margin-top:3px}
-.pfa{text-align:center;font-size:13.5px;color:var(--muted);border-top:1px dashed var(--glass-brd);padding-top:10px}
+.rword .typed{font-family:var(--font-en);font-size:12px;color:var(--bad);direction:ltr;margin-top:2px;max-width:100%;overflow-wrap:anywhere;text-align:center}
+.rword .fa{font-size:12px;color:var(--muted);margin-top:3px;max-width:100%;overflow-wrap:anywhere;text-align:center}
+.pfa{text-align:center;font-size:13.5px;color:var(--muted);border-top:1px dashed var(--glass-brd);padding-top:10px;line-height:2;overflow-wrap:anywhere}
 .result-tip{text-align:center;font-size:12px;color:var(--faint);margin-top:4px}
 
 /* ---------- نتیجه ---------- */
@@ -465,9 +469,9 @@ input{font-family:inherit}
 }
 .rw.ok{border-inline-start-color:var(--ok)}
 .rw.bad{border-inline-start-color:var(--bad)}
-.rw .en{font-family:var(--font-en);font-weight:600;direction:ltr;font-size:15px}
-.rw .fa{color:var(--muted);font-size:13px;margin-inline-start:auto}
-.rw .fix{color:var(--bad);font-family:var(--font-en);font-size:13px;direction:ltr}
+.rw .en{font-family:var(--font-en);font-weight:600;direction:ltr;font-size:15px;min-width:0;overflow-wrap:anywhere}
+.rw .fa{color:var(--muted);font-size:13px;margin-inline-start:auto;overflow-wrap:anywhere}
+.rw .fix{color:var(--bad);font-family:var(--font-en);font-size:13px;direction:ltr;min-width:0;overflow-wrap:anywhere}
 .result-actions{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
 
 /* ---------- مرور / آمار ---------- */
@@ -525,4 +529,15 @@ input{font-family:inherit}
   .hero h1{font-size:36px}
   .demo-card{padding:28px 26px 22px}
   .pch{width:40px;height:54px;font-size:23px}
+}
+
+/* ---------- موبایل باریک: جلوگیری از بیرون‌زدگی ---------- */
+@media (max-width:380px){
+  .rword .en{font-size:19px}
+  .pwords{gap:10px 14px}
+  .score-grid{gap:7px}
+  .score-card{padding:12px 4px}
+  .score-card .num{font-size:20px}
+  .score-card .lbl{font-size:10.5px}
+  .act-pill{font-size:14px;padding:13px 12px}
 }
