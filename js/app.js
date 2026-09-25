@@ -1,4 +1,4 @@
-/* ===== TypeHub App — منطق اصلی (ریفکتور: Light Editorial) ===== */
+/* ===== TypeHub App — منطق اصلی (مدل دیکته با جای خالی) ===== */
 const $ = (s) => document.querySelector(s);
 const faNum = (n) => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
@@ -14,6 +14,65 @@ const store = {
   save() { localStorage.setItem(LS_KEY, JSON.stringify(this.data)); }
 };
 const P = store.load();
+
+/* ---------- وضعیت نشست (حافظه‌ای، نه ذخیره‌شده) ---------- */
+let perfectRun = 0;   // تمرین‌های کامل پشت‌سرهم در این نشست
+let sessionXp = 0;    // امتیاز گرفته‌شده در این نشست
+
+/* ===== PURE-LOGIC: ماشین حالت جای خالی (بدون DOM — قابل تست در node) ===== */
+function newBlanks(targets) { return { targets, vals: targets.map(() => ''), cur: 0 }; }
+function fullAt(st, i) { return st.vals[i].length >= st.targets[i].length; }
+function allFilled(st) { return st.vals.every((v, i) => fullAt(st, i)); }
+function blankTypeChar(st, ch) {
+  ch = String(ch).toLowerCase();
+  if (!/^[a-z']$/.test(ch)) return false;
+  const t = st.targets[st.cur];
+  if (st.vals[st.cur].length >= t.length) return false;
+  st.vals[st.cur] += ch;
+  return true;
+}
+function blankBackspace(st) {
+  // 'del' = یک حرف پاک شد | 'prev' = رفت به جای قبلی | 'noop'
+  if (st.vals[st.cur].length > 0) { st.vals[st.cur] = st.vals[st.cur].slice(0, -1); return 'del'; }
+  if (st.cur > 0) { st.cur--; return 'prev'; }
+  return 'noop';
+}
+function blankSpace(st) {
+  // 'next' = رفت سراغ جای خالی بعدی | 'submit' = همه پرند، ثبت کن | 'noop'
+  if (st.vals[st.cur].length === 0) return 'noop';
+  if (allFilled(st)) return 'submit';
+  for (let k = 1; k <= st.targets.length; k++) {
+    const i = (st.cur + k) % st.targets.length;
+    if (!fullAt(st, i)) { st.cur = i; return 'next'; }
+  }
+  return 'submit';
+}
+function blankEnter(st) { return allFilled(st) ? 'submit' : 'goto-empty'; }
+function firstOpenIdx(st) { return st.vals.findIndex((v, i) => !fullAt(st, i)); }
+function blankHint(st) {
+  // حرف بعدی جای خالی جاری (یا اولین جای ناقص) را نشان می‌دهد
+  let i = st.cur;
+  if (st.vals[i].length >= st.targets[i].length) {
+    i = st.targets.findIndex((t, k) => st.vals[k].length < t.length);
+    if (i < 0) return false;
+    st.cur = i;
+  }
+  const t = st.targets[i];
+  st.vals[i] += t[st.vals[i].length];
+  return true;
+}
+function blankReveal(st) {
+  // کل کلمه‌ی جای خالی جاری (یا اولین جای ناقص) را پر می‌کند
+  let i = st.cur;
+  if (st.vals[i].length >= st.targets[i].length) {
+    i = st.targets.findIndex((t, k) => st.vals[k].length < t.length);
+    if (i < 0) return false;
+    st.cur = i;
+  }
+  st.vals[i] = st.targets[i];
+  return true;
+}
+/* ===== /PURE-LOGIC ===== */
 
 /* ---------- ناوبری ---------- */
 function show(name) {
@@ -39,7 +98,6 @@ function renderHome() {
   $('#stats-summary').textContent = P.done
     ? `${faNum(P.done)} تمرین • میانگین دقت ${faNum(Math.round(P.accSum / P.done))}٪`
     : 'هنوز تمرینی ثبت نشده';
-  // حلقه هدف روزانه
   const GOAL = 5;
   const todayDone = (P.dayDone && P.dayDone[Engine.todayKey()]) || 0;
   const frac = Math.min(todayDone / GOAL, 1);
@@ -55,12 +113,11 @@ function renderHome() {
 }
 $('#btn-start-zero').addEventListener('click', () => startLevel(0));
 $('#btn-continue').addEventListener('click', () => {
-  // اولین سطحی که هنوز کامل نشده
   const lvl = LEVELS.find(l => (P.levelDone[l.id] || 0) < l.items.length) || LEVELS[LEVELS.length - 1];
   startLevel(lvl.id);
 });
 
-/* ---------- کارت‌های مسیر (editorial شماره‌دار) ---------- */
+/* ---------- کارت‌های مسیر ---------- */
 function renderLevelCards(boxSel, withTip) {
   const box = $(boxSel);
   if (!box) return;
@@ -86,25 +143,126 @@ function renderLevelCards(boxSel, withTip) {
   });
 }
 
-/* ---------- دموی خانه: پخش نمونه با کارائوکه ---------- */
+/* ---------- دموی خانه ---------- */
 $('#demo-play').addEventListener('click', async () => {
   const btn = $('#demo-play');
   btn.disabled = true;
-  const words = document.querySelectorAll('#demo-words .demo-word');
-  await Engine.speakKaraoke('sheep ship', {
-    onWord: (i) => words.forEach((w, k) => w.classList.toggle('spoken', k === i))
-  });
-  words.forEach(w => w.classList.remove('spoken'));
+  await Engine.speak('sheep ship');
   btn.disabled = false;
 });
 
+/* ---------- ابزارهای مشترک جای خالی ---------- */
+const BLANK_UI = {
+  p:  { box: '#blank-row',    hint: '#hint-line' },
+  pl: { box: '#place-blanks', hint: '#place-hint' }
+};
+function sessOf(tag) { return tag === 'p' ? S : PL; }
+function bInputs(tag) { return Array.from(document.querySelectorAll(BLANK_UI[tag].box + ' .blank')); }
+function bSync(tag) {
+  const sess = sessOf(tag);
+  if (!sess || !sess.st) return;
+  bInputs(tag).forEach((inp, i) => { sess.st.vals[i] = inp.value; });
+}
+function bPaint(tag) {
+  const sess = sessOf(tag);
+  if (!sess || !sess.st) return;
+  bInputs(tag).forEach((inp, i) => {
+    inp.classList.toggle('cur', i === sess.st.cur);
+    inp.classList.toggle('filled', inp.value.length > 0);
+  });
+}
+function bFocus(tag, i) {
+  const inputs = bInputs(tag);
+  if (inputs[i]) inputs[i].focus({ preventScroll: true });
+}
+function renderBlanks(tag) {
+  const sess = sessOf(tag);
+  const ui = BLANK_UI[tag];
+  const box = $(ui.box), hint = $(ui.hint);
+  const st = sess.st;
+  const isLetter = (tag === 'p') ? sess.level.kind === 'letter' : false;
+  box.innerHTML = '';
+  box.classList.remove('shake');
+  if (hint) {
+    if (isLetter) { hint.classList.add('hidden'); hint.innerHTML = ''; }
+    else {
+      hint.classList.remove('hidden');
+      hint.innerHTML = st.targets.map(t =>
+        `<span class="hh"><b>${t[0]}</b>${'·'.repeat(Math.max(0, t.length - 1))}</span>`).join('');
+    }
+  }
+  st.targets.forEach((t, i) => {
+    const inp = document.createElement('input');
+    inp.className = 'blank' + (i === st.cur ? ' cur' : '');
+    inp.maxLength = t.length;
+    inp.autocomplete = 'off'; inp.autocorrect = 'off'; inp.autocapitalize = 'off'; inp.spellcheck = false;
+    inp.setAttribute('aria-label', 'کلمه‌ی ' + faNum(i + 1));
+    inp.style.width = Math.max(52, t.length * 22 + 30) + 'px';
+    inp.addEventListener('input', () => onBlankInput(tag, inp, i));
+    inp.addEventListener('keydown', (e) => onBlankKey(tag, e, inp, i));
+    inp.addEventListener('focus', () => {
+      const s2 = sessOf(tag);
+      if (s2 && !s2.doneOnce) { s2.st.cur = i; bPaint(tag); }
+    });
+    box.appendChild(inp);
+  });
+}
+function onBlankInput(tag, inp, i) {
+  const sess = sessOf(tag);
+  if (!sess || sess.doneOnce) return;
+  const max = sess.st.targets[i].length;
+  inp.value = inp.value.toLowerCase().replace(/[^a-z']/g, '').slice(0, max);
+  if (!sess.t0) sess.t0 = Date.now();
+  bSync(tag);
+  bPaint(tag);
+}
+function onBlankKey(tag, e, inp, i) {
+  const sess = sessOf(tag);
+  if (!sess || sess.doneOnce) return;
+  if (e.key === 'Backspace' && inp.value === '' && i > 0) {
+    e.preventDefault();
+    sess.st.cur = i - 1;
+    bPaint(tag); bFocus(tag, i - 1);
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    bSync(tag);
+    const r = blankSpace(sess.st);
+    if (r === 'submit') trySubmit(tag);
+    else if (r === 'next') { bPaint(tag); bFocus(tag, sess.st.cur); }
+    else shakeBlank(inp);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    bSync(tag);
+    if (blankEnter(sess.st) === 'submit') trySubmit(tag);
+    else { const fi = firstOpenIdx(sess.st); if (fi >= 0) { sess.st.cur = fi; bPaint(tag); bFocus(tag, fi); } }
+  }
+}
+function shakeBlank(inp) {
+  inp.classList.remove('shk'); void inp.offsetWidth; inp.classList.add('shk');
+}
+function trySubmit(tag) {
+  const sess = sessOf(tag);
+  if (!sess || sess.doneOnce) return;
+  bSync(tag);
+  if (!allFilled(sess.st)) {
+    const box = $(BLANK_UI[tag].box);
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    const fi = firstOpenIdx(sess.st);
+    if (fi >= 0) { sess.st.cur = fi; bPaint(tag); bFocus(tag, fi); }
+    return;
+  }
+  if (tag === 'p') finishItem(); else placeSubmit();
+}
+
 /* ---------- جلسه تمرین ---------- */
-let S = null; // { level, queue, idx, playsLeft, slow, t0, wrongWords }
+let S = null; // { level, queue, idx, playsLeft, slow, t0, st, cheated, doneOnce, timerId, finishedItem, titleSuffix, wrongWords }
 
 function startLevel(levelId, customItems = null, titleSuffix = '') {
   const level = LEVELS.find(l => l.id === levelId);
   const items = customItems || Engine.shuffle(level.items);
-  S = { level, queue: items, idx: 0, playsLeft: 3, slow: false, t0: null, wrongWords: [], titleSuffix };
+  S = { level, queue: items, idx: 0, playsLeft: 3, slow: false, t0: null, st: null,
+        cheated: false, doneOnce: false, timerId: null, finishedItem: null,
+        titleSuffix, wrongWords: [] };
   show('practice');
   loadItem();
 }
@@ -114,144 +272,100 @@ function currentItem() { return S.queue[S.idx]; }
 function loadItem() {
   const item = currentItem();
   const total = S.queue.length;
-  S.submitted = false;
-  S.combo = 0; S.comboBest = 0; S.spokenIdx = -1;
-  const cp = $('#combo-pill'); if (cp) cp.classList.add('hidden');
+  const isLetter = S.level.kind === 'letter';
+  const targets = (isLetter ? [item.en] : Engine.tokenize(item.en)).map(Engine.normWord);
+  S.st = newBlanks(targets);
+  S.cheated = false; S.doneOnce = false; S.t0 = null;
+  S.slow = false; S.playsLeft = Server.maxPlays;
   $('#practice-level').textContent = S.level.name + S.titleSuffix;
   $('#practice-count').textContent = `${faNum(S.idx + 1)} / ${faNum(total)}`;
   $('#practice-bar').style.width = (S.idx / total * 100) + '%';
-  const inp = $('#type-input');
-  inp.value = '';
-  inp.classList.remove('auto-ok');
-  S.doneOnce = false;
-  $('#live-acc').textContent = '—';
   $('#btn-slow').classList.remove('on');
-  S.slow = false; S.playsLeft = Server.maxPlays; S.t0 = null;
+  $('#btn-hint').classList.remove('used');
+  $('#btn-reveal').classList.remove('used');
   updatePlays();
-  renderSlots(item, '');
-  setTimeout(() => { inp.focus({ preventScroll: true }); playAudio(); }, 350);
+  renderSess();
+  renderBlanks('p');
+  startTimer();
+  setTimeout(() => { bFocus('p', 0); playAudio(); }, 350);
 }
 
-function updatePlays() { $('#plays-left').textContent = faNum(S.playsLeft); }
+function updatePlays() { if (S) $('#plays-left').textContent = faNum(S.playsLeft); }
+
+function renderSess() {
+  $('#sess-time').textContent = '۰۰:۰۰';
+  $('#sess-score').textContent = faNum(sessionXp);
+  $('#sess-combo').textContent = faNum(perfectRun);
+}
+function startTimer() {
+  stopTimer();
+  const t0 = Date.now();
+  S.timerId = setInterval(() => {
+    if (!S || !S.timerId) return;
+    const s = Math.floor((Date.now() - t0) / 1000);
+    const el = $('#sess-time');
+    if (el) el.textContent = faNum(String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'));
+  }, 1000);
+}
+function stopTimer() { if (S && S.timerId) { clearInterval(S.timerId); S.timerId = null; } }
 
 async function playAudio() {
-  if (!S || S.playsLeft <= 0) return;
+  if (!S || S.playsLeft <= 0 || S.doneOnce) return;
   const item = currentItem();
   S.playsLeft--;
   updatePlays();
   const btn = $('#btn-play');
   btn.classList.add('playing');
-  // کارائوکه: کلمه‌ای که دارد گفته می‌شود روشن می‌شود
-  await Engine.speakKaraoke(item.en, { slow: S.slow, onWord: (i) => { S.spokenIdx = i; karaokeHL('#word-slots', i); } });
+  await Engine.speak(item.en, { slow: S.slow });
   btn.classList.remove('playing');
-  if (S) { S.spokenIdx = -1; karaokeHL('#word-slots', -1); }
-}
-// هایلایت اسلات شماره i داخل باکس (i منفی = پاک کردن)
-function karaokeHL(boxSel, i) {
-  const box = $(boxSel);
-  if (!box) return;
-  const kids = box.children;
-  for (let k = 0; k < kids.length; k++) kids[k].classList.toggle('spoken', k === i);
 }
 $('#btn-play').addEventListener('click', playAudio);
 $('#btn-slow').addEventListener('click', (e) => {
-  if (!S) return;
+  if (!S || S.doneOnce) return;
   S.slow = !S.slow;
   e.currentTarget.classList.toggle('on', S.slow);
   if (S.playsLeft < Server.maxPlays) { S.playsLeft++; updatePlays(); } // پخش آهسته یک شانس اضافه
   playAudio();
 });
 
-/* رندر اسلات‌های کلمه: waiting / cur / ok / bad + spoken */
-function renderSlots(item, typed) {
-  const box = $('#word-slots');
-  const prev = box._st || [];
-  box.innerHTML = '';
-  const display = S.level.kind === 'letter' ? [item.en] : Engine.tokenize(item.en);
-  const targets = display.map(Engine.normWord);
-  const typedWords = typed.split(/\s+/).map(Engine.normWord);
-  const now = [];
-  const states = [];
-  targets.forEach((tw, i) => {
-    const yw = typedWords[i] || '';
-    let st = '';
-    if (yw !== '') {
-      if (yw === tw) st = 'ok';
-      else if (typedWords.length > i + 1 || (S.level.kind !== 'letter' && typed.endsWith(' ')) || yw.length >= tw.length) st = 'bad';
-    }
-    states.push(st);
-  });
-  // کلمه جاری = اولین کلمه‌ای که هنوز درست نشده
-  let cur = states.findIndex(st => st !== 'ok');
-  if (cur < 0) cur = states.length - 1;
-  targets.forEach((tw, i) => {
-    const st = states[i];
-    const d = document.createElement('div');
-    d.className = 'slot';
-    d.textContent = display[i];
-    if (i === cur) d.classList.add('cur');
-    now.push(st);
-    if (st) d.classList.add(st);
-    if (i === S.spokenIdx) d.classList.add('spoken'); // حفظ هایلایت کارائوکه هنگام تایپ
-    // حس بازی: کلمه‌ای که تازه درست شد می‌پرد + کمبو
-    if (st === 'ok' && prev[i] !== 'ok') {
-      d.classList.add('pop');
-      S.combo++;
-      if (S.combo > S.comboBest) S.comboBest = S.combo;
-      updateComboPill(false);
-    }
-    // خطا کمبو را می‌شکند
-    if (st === 'bad' && prev[i] !== 'bad' && S.combo > 0) {
-      S.combo = 0;
-      updateComboPill(true);
-    }
-    box.appendChild(d);
-  });
-  box._st = now;
-}
-
-// نمایش/به‌روزرسانی نشان کمبو
-function updateComboPill(broken) {
-  const pill = $('#combo-pill');
-  if (!pill) return;
-  if (S.combo >= 2) {
-    pill.classList.remove('hidden');
-    $('#combo-n').textContent = faNum(S.combo);
-    pill.classList.remove('pop', 'shake');
-    void pill.offsetWidth; // ری‌استارت انیمیشن
-    pill.classList.add(broken ? 'shake' : 'pop');
-  } else {
-    pill.classList.add('hidden');
+/* راهنمایی: حرف بعدی جای خالی جاری — کمبو می‌شکند */
+$('#btn-hint').addEventListener('click', () => {
+  if (!S || S.doneOnce) return;
+  bSync('p');
+  if (blankHint(S.st)) {
+    S.cheated = true;
+    $('#btn-hint').classList.add('used');
+    if (!S.t0) S.t0 = Date.now();
+    renderBlanks('p');
+    // مقدارها را از state برگردان (renderBlanks ورودی خالی می‌سازد)
+    const inputs = bInputs('p');
+    inputs.forEach((inp, i) => { inp.value = S.st.vals[i]; });
+    bPaint('p'); bFocus('p', S.st.cur);
   }
-}
+});
+/* نمایش جواب: پر کردن جای خالی جاری — کمبو می‌شکند */
+$('#btn-reveal').addEventListener('click', () => {
+  if (!S || S.doneOnce) return;
+  bSync('p');
+  if (blankReveal(S.st)) {
+    S.cheated = true;
+    $('#btn-reveal').classList.add('used');
+    if (!S.t0) S.t0 = Date.now();
+    renderBlanks('p');
+    const inputs = bInputs('p');
+    inputs.forEach((inp, i) => { inp.value = S.st.vals[i]; });
+    bPaint('p'); bFocus('p', S.st.cur);
+  }
+});
 
-$('#type-input').addEventListener('input', (e) => {
+$('#btn-check').addEventListener('click', () => trySubmit('p'));
+$('#btn-skip').addEventListener('click', () => {
   if (!S) return;
-  const item = currentItem();
-  if (!S.t0) S.t0 = Date.now();
-  let v = e.target.value;
-  if (S.level.kind === 'letter' && v.length > 1) { v = v.slice(-1); e.target.value = v; }
-  renderSlots(item, v);
-  const acc = Engine.liveAccuracy(item.en, v);
-  $('#live-acc').textContent = acc === null ? '—' : faNum(acc) + '٪';
-  // تشخیص خودکار: وقتی کل جواب درست تایپ شد، بدون دکمه دستی ثبت می‌شود
-  if (!S.submitted) {
-    const targets = S.level.kind === 'letter' ? [item.en] : Engine.tokenize(item.en);
-    const want = targets.map(Engine.normWord).join(' ');
-    const got = Engine.tokenize(v).join(' ');
-    if (got !== '' && got === want) {
-      S.submitted = true;
-      e.target.classList.add('auto-ok');
-      setTimeout(() => { e.target.blur(); finishItem(); }, 500);
-    }
-  }
+  perfectRun = 0; // رد کردن هم کمبو را می‌شکند
+  renderSess();
+  stopTimer();
+  nextItem();
 });
-
-$('#btn-check').addEventListener('click', finishItem);
-$('#type-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); finishItem(); }
-});
-$('#btn-skip').addEventListener('click', () => { if (S) nextItem(false); });
 
 function wordFa(item, enWord) {
   if (item.w) {
@@ -262,30 +376,34 @@ function wordFa(item, enWord) {
 }
 
 function finishItem() {
-  if (!S || S.doneOnce) return; // ضد ثبت دوباره (اینتر سریع بعد از تشخیص خودکار)
+  if (!S || S.doneOnce) return;
   S.doneOnce = true;
+  stopTimer();
+  bSync('p');
   const item = currentItem();
-  const typed = $('#type-input').value;
+  S.finishedItem = item;
+  const typed = S.st.vals.join(' ');
   const secs = S.t0 ? (Date.now() - S.t0) / 1000 : 5;
   const r = Engine.score(item.en, typed, secs, S.level.kind);
+  const perfect = r.accuracy === 100 && !S.cheated;
+  if (perfect) perfectRun++; else perfectRun = 0;
+  const perfectBonus = (perfect && perfectRun >= 2) ? perfectRun * 10 : 0;
+  const gainedXp = r.xp + perfectBonus;
+  sessionXp += gainedXp;
 
-  // ثبت پیشرفت (+ بونوس کمبو)
-  const comboBonus = S.comboBest >= 3 ? S.comboBest * 2 : 0;
-  const gainedXp = r.xp + comboBonus;
+  // ثبت پیشرفت
   P.done++; P.xp += gainedXp; P.correctWords += r.correct; P.totalWords += r.total;
   P.accSum += r.accuracy; P.wpmSum += r.wpm;
   const today0 = Engine.todayKey();
   if (!P.dayDone) P.dayDone = {};
   P.dayDone[today0] = (P.dayDone[today0] || 0) + 1;
   P.levelDone[S.level.id] = (P.levelDone[S.level.id] || 0) + 1;
-  // استریک
   const today = Engine.todayKey();
   if (P.lastDay !== today) {
     const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
     P.streak = (P.lastDay === y) ? P.streak + 1 : 1;
     P.lastDay = today;
   }
-  // خطاها
   const wrongs = r.wrong.map(wr => ({ en: wr.target, fa: wordFa(item, wr.target), level: S.level.id }));
   wrongs.forEach(wr => {
     if (!P.mistakes.some(m => m.en === wr.en)) P.mistakes.push(wr);
@@ -293,57 +411,90 @@ function finishItem() {
   if (P.mistakes.length > 200) P.mistakes = P.mistakes.slice(-200);
   S.wrongWords = wrongs;
   store.save();
-  Server.push(); // همگام‌سازی با سرور (اگر لاگین است)
+  Server.push();
 
-  // نمایش نتیجه
-  $('#result-title').textContent = r.accuracy === 100 ? 'عالی بود! 🎉' : r.accuracy >= 70 ? 'خوب پیش می‌ری! 💪' : 'اشکال نداره، ادامه بده 🌱';
+  // جشن Perfect
+  const pr = $('#perfect-ribbon');
+  if (perfect) {
+    let conf = '';
+    for (let k = 0; k < 14; k++) conf += '<i></i>';
+    pr.innerHTML = `<div class="pf-conf">${conf}</div>
+      <div class="pf-big">!Perfect × ${faNum(perfectRun)}</div>
+      ${perfectBonus > 0 ? `<div class="pf-sub">+${faNum(perfectBonus)} بونوس کمبو 🔥</div>` : ''}`;
+    pr.classList.remove('hidden');
+    $('#result-title').textContent = 'آفرین! 🎉';
+  } else {
+    pr.classList.add('hidden'); pr.innerHTML = '';
+    $('#result-title').textContent = r.accuracy >= 70 ? 'خوب پیش می‌ری! 💪' : 'اشکال نداره، ادامه بده 🌱';
+  }
   $('#r-acc').textContent = faNum(r.accuracy) + '٪';
   $('#r-wpm').textContent = faNum(r.wpm);
   $('#r-xp').textContent = '+' + faNum(gainedXp);
   const rc = $('#r-combo');
-  if (rc) {
-    if (comboBonus > 0) { rc.classList.remove('hidden'); rc.innerHTML = `🔥 بونوس کمبو <b>×${faNum(S.comboBest)}</b>: <b>+${faNum(comboBonus)}</b>`; }
-    else rc.classList.add('hidden');
-  }
+  if (perfectBonus > 0) { rc.classList.remove('hidden'); rc.innerHTML = `🔥 کمبوی <b>×${faNum(perfectRun)}</b>: <b>+${faNum(perfectBonus)}</b> امتیاز اضافه`; }
+  else rc.classList.add('hidden');
+
+  // کارت کلمه: عبارت کامل + معنی فارسی زیر هر کلمه
   const box = $('#result-words');
   box.innerHTML = '';
-  r.detail.forEach(d => {
-    const row = document.createElement('div');
-    row.className = 'rw ' + (d.ok ? 'ok' : 'bad');
-    const fa = wordFa(item, d.target);
-    row.innerHTML = d.ok
-      ? `<span class="en">${d.target}</span><span class="fa">${fa}</span>`
-      : `<span class="en">${d.target}</span><span class="fix">✗ ${d.typed || '—'}</span><span class="fa">${fa}</span>`;
-    box.appendChild(row);
+  const card = document.createElement('div');
+  card.className = 'pcard';
+  const pw = document.createElement('div');
+  pw.className = 'pwords';
+  const rawTargets = S.level.kind === 'letter' ? [item.en] : Engine.tokenize(item.en);
+  rawTargets.forEach((tw, i) => {
+    const d = r.detail[i];
+    const w = document.createElement('div');
+    w.className = 'pword' + (d && !d.ok ? ' bad' : '');
+    const fa = wordFa(item, Engine.normWord(tw));
+    w.innerHTML = `<span class="en">${tw}</span>` +
+      (d && !d.ok ? `<span class="typed">✗ ${d.typed || '—'}</span>` : '') +
+      `<span class="fa">${fa}</span>`;
+    pw.appendChild(w);
   });
-  // معنی کل جمله
-  const all = document.createElement('div');
-  all.className = 'rw';
-  all.innerHTML = `<span class="en" style="font-weight:400">${item.en}</span><span class="fa">🇮🇷 ${item.fa}</span>`;
-  box.appendChild(all);
+  card.appendChild(pw);
+  const allFa = document.createElement('div');
+  allFa.className = 'pfa';
+  allFa.textContent = '🇮🇷 ' + item.fa;
+  card.appendChild(allFa);
+  box.appendChild(card);
+
   $('#btn-retry-wrong').style.display = wrongs.length ? '' : 'none';
   $('#practice-bar').style.width = ((S.idx + 1) / S.queue.length * 100) + '%';
+  renderSess();
   show('result');
 }
 
-function nextItem(counted = true) {
+function nextItem() {
+  if (!S) return;
   Engine.stopSpeak();
+  stopTimer();
   S.idx++;
   if (S.idx >= S.queue.length) { show('levels'); renderHome(); return; }
   show('practice');
   loadItem();
 }
 $('#btn-next').addEventListener('click', () => nextItem());
+$('#btn-replay').addEventListener('click', () => {
+  if (S && S.finishedItem) Engine.speak(S.finishedItem.en);
+});
 $('#btn-retry-wrong').addEventListener('click', () => {
+  if (!S) return;
   const items = S.wrongWords.map(w => ({ en: w.en, fa: w.fa, topic: 'مرور خطا' }));
   startLevel(S.level.id, items, ' — مرور غلط‌ها');
 });
+/* Enter/Space روی صفحه نتیجه = تمرین بعدی */
+document.addEventListener('keydown', (e) => {
+  if (!$('#screen-result') || !$('#screen-result').classList.contains('active')) return;
+  if (e.target && e.target.matches && e.target.matches('input,textarea')) return;
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nextItem(); }
+});
 
 /* ---------- کیبورد روی صفحه (QWERTY) ---------- */
-function buildOSK(boxSel, inputSel) {
+function buildOSK(boxSel, tag) {
   const box = $(boxSel);
   if (!box) return;
-  const rows = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+  const rows = ['qwertyuiop', 'asdfghjkl', "zxcvbnm'"];
   box.innerHTML = '';
   rows.forEach((r, ri) => {
     const row = document.createElement('div');
@@ -351,13 +502,13 @@ function buildOSK(boxSel, inputSel) {
     r.split('').forEach(ch => {
       const k = document.createElement('button');
       k.type = 'button'; k.className = 'osk-key'; k.textContent = ch;
-      k.addEventListener('click', () => oskType(inputSel, ch));
+      k.addEventListener('click', () => oskPress(tag, ch));
       row.appendChild(k);
     });
     if (ri === 2) {
       const bk = document.createElement('button');
       bk.type = 'button'; bk.className = 'osk-key fn'; bk.textContent = '⌫'; bk.title = 'پاک کردن';
-      bk.addEventListener('click', () => oskType(inputSel, 'BKSP'));
+      bk.addEventListener('click', () => oskPress(tag, 'BKSP'));
       row.appendChild(bk);
     }
     box.appendChild(row);
@@ -366,29 +517,48 @@ function buildOSK(boxSel, inputSel) {
   srow.className = 'osk-row';
   const sp = document.createElement('button');
   sp.type = 'button'; sp.className = 'osk-key wide'; sp.textContent = 'فاصله';
-  sp.addEventListener('click', () => oskType(inputSel, ' '));
+  sp.addEventListener('click', () => oskPress(tag, 'SPACE'));
   srow.appendChild(sp);
   box.appendChild(srow);
 }
-function oskType(inputSel, ch) {
-  const inp = $(inputSel);
+function oskPress(tag, key) {
+  const sess = sessOf(tag);
+  if (!sess || sess.doneOnce || !sess.st) return;
+  const inputs = bInputs(tag);
+  const i = sess.st.cur;
+  const inp = inputs[i];
   if (!inp) return;
-  if (ch === 'BKSP') inp.value = inp.value.slice(0, -1);
-  else inp.value += ch;
-  inp.dispatchEvent(new Event('input', { bubbles: true }));
+  if (key === 'BKSP') {
+    if (inp.value.length > 0) inp.value = inp.value.slice(0, -1);
+    else if (i > 0) { sess.st.cur = i - 1; bFocus(tag, i - 1); }
+  } else if (key === 'SPACE') {
+    bSync(tag);
+    const r = blankSpace(sess.st);
+    if (r === 'submit') { trySubmit(tag); return; }
+    if (r === 'next') { bPaint(tag); bFocus(tag, sess.st.cur); return; }
+    shakeBlank(inp); return;
+  } else {
+    const t = sess.st.targets[i];
+    if (inp.value.length < t.length && /^[a-z']$/.test(key)) {
+      inp.value += key;
+      if (!sess.t0) sess.t0 = Date.now();
+    } else { shakeBlank(inp); return; }
+  }
+  bSync(tag);
+  bPaint(tag);
   inp.focus({ preventScroll: true });
 }
-function setupKbToggle(btnSel, boxSel, inputSel) {
+function setupKbToggle(btnSel, boxSel, tag) {
   const btn = $(btnSel), box = $(boxSel);
   if (!btn || !box) return;
-  buildOSK(boxSel, inputSel);
+  buildOSK(boxSel, tag);
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   const set = (on) => { box.classList.toggle('hidden', !on); btn.classList.toggle('on', on); };
   set(isTouch);
   btn.addEventListener('click', () => set(box.classList.contains('hidden')));
 }
-setupKbToggle('#kb-toggle', '#osk', '#type-input');
-setupKbToggle('#place-kb-toggle', '#place-osk', '#place-input');
+setupKbToggle('#kb-toggle', '#osk', 'p');
+setupKbToggle('#place-kb-toggle', '#place-osk', 'pl');
 
 /* ---------- مرور خطاها ---------- */
 function renderReview() {
@@ -458,7 +628,6 @@ const Server = {
       area.appendChild(chip);
       document.getElementById('btn-logout').classList.remove('hidden');
       document.getElementById('guest-banner').classList.add('hidden');
-      // سینک: پیشرفت لوکال را بفرست، نسخه ادغام‌شده سرور را بگیر
       try {
         const r = await TH.api('/api/th/progress', 'POST', { progress: P });
         if (r.body.ok && r.body.progress) {
@@ -481,11 +650,10 @@ const Server = {
 Server.boot();
 $('#btn-logout').addEventListener('click', () => { if (confirm('از حساب خارج بشی؟')) TH.logout(); });
 
-/* ---------- تعیین سطح 🎯 ---------- */
-let PL = null; // { qs, idx, correct, playsLeft, slow, t0, done }
+/* ---------- تعیین سطح 🎯 (مدل جای خالی) ---------- */
+let PL = null; // { qs, idx, correct, playsLeft, slow, t0, st, done }
 
 function buildPlacementQs() {
-  // از هر سطح ۱ تا ۶ یک سؤال نمونه (وسط لیست)
   return [1, 2, 3, 4, 5, 6].map(lid => {
     const lv = LEVELS.find(l => l.id === lid);
     return lv.items[Math.floor(lv.items.length / 2)];
@@ -493,7 +661,7 @@ function buildPlacementQs() {
 }
 
 $('#btn-placement').addEventListener('click', () => {
-  PL = { qs: buildPlacementQs(), idx: 0, correct: 0, playsLeft: 2, slow: false, t0: null, done: false };
+  PL = { qs: buildPlacementQs(), idx: 0, correct: 0, playsLeft: 2, slow: false, t0: null, st: null, done: false };
   $('#place-result').classList.add('hidden');
   show('placement');
   loadPlaceQ();
@@ -501,94 +669,58 @@ $('#btn-placement').addEventListener('click', () => {
 
 function loadPlaceQ() {
   const q = PL.qs[PL.idx];
-  PL.playsLeft = 2; PL.slow = false; PL.t0 = null; PL.done = false; PL.spokenIdx = -1;
+  PL.playsLeft = 2; PL.slow = false; PL.t0 = null; PL.done = false;
+  PL.st = newBlanks(Engine.tokenize(q.en).map(Engine.normWord));
   $('#place-count').textContent = `${faNum(PL.idx + 1)} / ${faNum(PL.qs.length)}`;
   $('#place-bar').style.width = (PL.idx / PL.qs.length * 100) + '%';
-  const inp = $('#place-input');
-  inp.value = ''; inp.classList.remove('auto-ok');
   $('#place-slow').classList.remove('on');
   updatePlacePlays();
-  renderPlaceSlots(q, '');
-  setTimeout(() => { inp.focus({ preventScroll: true }); placePlay(); }, 350);
+  renderBlanks('pl');
+  setTimeout(() => { bFocus('pl', 0); placePlay(); }, 350);
 }
 
-function updatePlacePlays() { $('#place-plays').textContent = faNum(PL.playsLeft); }
-
-function renderPlaceSlots(q, typed) {
-  const box = $('#place-slots');
-  box.innerHTML = '';
-  const display = Engine.tokenize(q.en);
-  const targets = display.map(Engine.normWord);
-  const typedWords = typed.split(/\s+/).map(Engine.normWord);
-  const states = [];
-  targets.forEach((tw, i) => {
-    const yw = typedWords[i] || '';
-    let st = '';
-    if (yw !== '') {
-      if (yw === tw) st = 'ok';
-      else if (typedWords.length > i + 1 || typed.endsWith(' ') || yw.length >= tw.length) st = 'bad';
-    }
-    states.push(st);
-  });
-  let cur = states.findIndex(st => st !== 'ok');
-  if (cur < 0) cur = states.length - 1;
-  targets.forEach((tw, i) => {
-    const d = document.createElement('div');
-    d.className = 'slot';
-    d.textContent = display[i];
-    if (i === cur) d.classList.add('cur');
-    if (states[i]) d.classList.add(states[i]);
-    if (PL && i === PL.spokenIdx) d.classList.add('spoken');
-    box.appendChild(d);
-  });
-}
+function updatePlacePlays() { if (PL) $('#place-plays').textContent = faNum(PL.playsLeft); }
 
 async function placePlay() {
-  if (!PL || PL.playsLeft <= 0) return;
+  if (!PL || PL.playsLeft <= 0 || PL.done) return;
   PL.playsLeft--;
   updatePlacePlays();
   const b = $('#place-play');
   b.classList.add('playing');
-  await Engine.speakKaraoke(PL.qs[PL.idx].en, { slow: PL.slow, onWord: (i) => { PL.spokenIdx = i; karaokeHL('#place-slots', i); } });
+  await Engine.speak(PL.qs[PL.idx].en, { slow: PL.slow });
   b.classList.remove('playing');
-  if (PL) { PL.spokenIdx = -1; karaokeHL('#place-slots', -1); }
 }
 $('#place-play').addEventListener('click', placePlay);
 $('#place-slow').addEventListener('click', (e) => {
-  if (!PL) return;
+  if (!PL || PL.done) return;
   PL.slow = !PL.slow;
   e.currentTarget.classList.toggle('on', PL.slow);
   placePlay();
 });
 
-$('#place-input').addEventListener('input', (e) => {
-  if (!PL) return;
-  const q = PL.qs[PL.idx];
-  if (!PL.t0) PL.t0 = Date.now();
-  const v = e.target.value;
-  renderPlaceSlots(q, v);
-  const want = Engine.tokenize(q.en).map(Engine.normWord).join(' ');
-  const got = Engine.tokenize(v).join(' ');
-  if (got !== '' && got === want && !PL.done) {
-    PL.done = true;
-    e.target.classList.add('auto-ok');
-    setTimeout(() => { PL.correct++; placeNext(); }, 500);
-  }
-});
+$('#place-check').addEventListener('click', () => trySubmit('pl'));
 $('#place-skip').addEventListener('click', () => { if (PL) placeNext(); });
 
+function placeSubmit() {
+  if (!PL || PL.done) return;
+  PL.done = true;
+  bSync('pl');
+  const typed = PL.st.vals.join(' ');
+  const r = Engine.score(PL.qs[PL.idx].en, typed, 5, 'word');
+  if (r.accuracy === 100) PL.correct++;
+  setTimeout(placeNext, 650);
+}
+
 function placeNext() {
+  if (!PL) return;
   Engine.stopSpeak();
   PL.idx++;
-  const inp = $('#place-input');
-  inp.classList.remove('auto-ok'); inp.blur();
   if (PL.idx >= PL.qs.length) return placeFinish();
   loadPlaceQ();
 }
 
 function placeFinish() {
   const c = PL.correct;
-  // نگاشت نمره به سطح پیشنهادی: ۰→الفبا، ۱→سطح۱، …، ۵و۶→سطح۵
   const suggest = c <= 0 ? 0 : c === 1 ? 1 : c === 2 ? 2 : c === 3 ? 3 : c === 4 ? 4 : 5;
   const lv = LEVELS.find(l => l.id === suggest);
   $('#place-bar').style.width = '100%';
