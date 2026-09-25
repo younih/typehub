@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="data:,">
+  <link rel="manifest" href="manifest.json">
+  <title>ورود | تایپ‌هاب TypeHub</title>
+  <style>
+    :root{
+      --bg:#0e1318;--paper:#161d24;--paper-2:#1a222b;--ink:#edf2f6;--muted:#a8b1bb;--line:#2a3540;
+      --acc:#22d3ee;--acc2:#818cf8;--ok:#22c55e;--warn:#f59e0b;--bad:#f43f5e;
+      --shadow:0 16px 44px rgba(0,0,0,.28);--radius:18px;
+    }
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--bg);color:var(--ink);font-family:Tahoma,sans-serif;line-height:1.6}
+    button,input{font:inherit}
+    .wrap{width:min(430px,100%)}
+    .brand{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:22px}
+    .logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-size:24px;box-shadow:var(--shadow)}
+    .brand h1{font-size:19px;margin:0}.brand p{margin:0;color:var(--muted);font-size:12px}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px}
+    .tabs{display:flex;background:var(--paper-2);border-radius:12px;padding:4px;margin-bottom:20px}
+    .tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:9px;cursor:pointer;font-weight:700}
+    .tabs button.active{background:var(--paper);color:var(--ink);box-shadow:0 1px 6px rgba(0,0,0,.3)}
+    .field{margin-bottom:13px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .field input{width:100%;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:11px;padding:11px 13px}
+    .field input:focus{outline:2px solid var(--acc);outline-offset:0;border-color:transparent}
+    .submit{width:100%;border:0;border-radius:11px;padding:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#06222a;font-weight:800;cursor:pointer;margin-top:6px}
+    .submit:disabled{opacity:.6;cursor:wait}
+    .msg{display:none;border-radius:11px;padding:11px 13px;font-size:12px;margin-bottom:14px}
+    .msg.show{display:block}
+    .msg.error{background:#2b1418;color:#f3a9bc;border:1px solid #5a2630}
+    .msg.warn{background:#2b2210;color:#e8c877;border:1px solid #5a4a1e}
+    .msg.success{background:#0f2b20;color:#8fdcb6;border:1px solid #1d4d38}
+    .announce{display:none;background:var(--paper);border:1px dashed var(--line);border-radius:12px;padding:11px 14px;font-size:12px;color:var(--muted);margin-bottom:16px}
+    .announce.show{display:block}.announce b{color:var(--ink);display:block;font-size:13px;margin-bottom:2px}
+    .hint{text-align:center;color:var(--muted);font-size:11px;margin-top:16px}
+    .guest{display:block;text-align:center;margin-top:14px;color:var(--muted);font-size:13px;text-decoration:none}
+    .guest:hover{color:var(--acc)}
+    .hidden{display:none!important}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo">⌨️</div>
+      <div><h1 id="siteName">تایپ‌هاب | TypeHub</h1><p>دیکته و تایپ انگلیسی برای فارسی‌زبانان</p></div>
+    </div>
+
+    <div class="announce" id="announce"><b>اطلاعیه</b><span id="announceText"></span></div>
+
+    <div class="card">
+      <div class="tabs">
+        <button id="tabLogin" class="active">ورود</button>
+        <button id="tabSignup">ثبت‌نام</button>
+      </div>
+
+      <div class="msg" id="msg"></div>
+
+      <form id="loginForm" autocomplete="on">
+        <div class="field"><label>ایمیل</label><input type="email" id="loginEmail" required dir="ltr" style="text-align:left" placeholder="you@example.com"></div>
+        <div class="field"><label>گذرواژه</label><input type="password" id="loginPass" required placeholder="••••••••"></div>
+        <button class="submit" id="loginBtn">ورود به تایپ‌هاب</button>
+      </form>
+
+      <form id="signupForm" class="hidden" autocomplete="on">
+        <div class="field"><label>نام و نام خانوادگی</label><input type="text" id="suName" required placeholder="مثلاً یونی"></div>
+        <div class="field"><label>ایمیل</label><input type="email" id="suEmail" required dir="ltr" style="text-align:left" placeholder="you@example.com"></div>
+        <div class="field"><label>گذرواژه (حداقل ۸ کاراکتر)</label><input type="password" id="suPass" required minlength="8" placeholder="••••••••"></div>
+        <button class="submit" id="signupBtn">ثبت‌نام</button>
+        <p class="hint">حساب‌های جدید پس از تأیید مدیر فعال می‌شوند.</p>
+      </form>
+    </div>
+    <a class="guest" href="app.html">ادامه به‌صورت مهمان ←</a>
+  </div>
+
+<script>
+(function(){
+  var msg=document.getElementById('msg');
+  function showMsg(text,kind){msg.textContent=text;msg.className='msg show '+kind;}
+  function hideMsg(){msg.className='msg';}
+  function api(path,method,body){
+    return fetch(path,{method:method||'GET',headers:{'Content-Type':'application/json'},
+      body:body?JSON.stringify(body):undefined}).then(function(r){return r.json().then(function(j){return {status:r.status,body:j};});});
+  }
+  function goPanel(role){location.replace(role==='admin'?'/admin.html':'/app.html');}
+
+  api('/api/public/site').then(function(r){
+    if(r.body.ok){
+      var s=r.body.site||{};
+      if(s.site_name){document.getElementById('siteName').textContent=s.site_name;document.title='ورود | '+s.site_name;}
+      if(s.announcement){document.getElementById('announceText').textContent=s.announcement;document.getElementById('announce').classList.add('show');}
+    }
+  });
+  api('/api/auth/me').then(function(r){if(r.body.ok&&r.body.user)goPanel(r.body.user.role);});
+
+  var tabLogin=document.getElementById('tabLogin'),tabSignup=document.getElementById('tabSignup'),
+      loginForm=document.getElementById('loginForm'),signupForm=document.getElementById('signupForm');
+  function selectTab(login){
+    tabLogin.classList.toggle('active',login);tabSignup.classList.toggle('active',!login);
+    loginForm.classList.toggle('hidden',!login);signupForm.classList.toggle('hidden',login);hideMsg();
+  }
+  tabLogin.addEventListener('click',function(){selectTab(true);});
+  tabSignup.addEventListener('click',function(){selectTab(false);});
+
+  loginForm.addEventListener('submit',function(e){
+    e.preventDefault();hideMsg();
+    var btn=document.getElementById('loginBtn');btn.disabled=true;btn.textContent='در حال ورود…';
+    api('/api/auth/login','POST',{email:document.getElementById('loginEmail').value,password:document.getElementById('loginPass').value})
+    .then(function(r){
+      btn.disabled=false;btn.textContent='ورود به تایپ‌هاب';
+      if(r.body.ok){goPanel(r.body.user.role);return;}
+      showMsg(r.body.message||'خطایی رخ داد.',r.body.error==='pending'?'warn':'error');
+    }).catch(function(){btn.disabled=false;btn.textContent='ورود به تایپ‌هاب';showMsg('ارتباط با سرور برقرار نشد.','error');});
+  });
+
+  signupForm.addEventListener('submit',function(e){
+    e.preventDefault();hideMsg();
+    var btn=document.getElementById('signupBtn');btn.disabled=true;btn.textContent='در حال ثبت‌نام…';
+    api('/api/auth/signup','POST',{name:document.getElementById('suName').value,email:document.getElementById('suEmail').value,password:document.getElementById('suPass').value})
+    .then(function(r){
+      btn.disabled=false;btn.textContent='ثبت‌نام';
+      if(r.status===201){signupForm.reset();showMsg('ثبت‌نام انجام شد! حساب شما پس از تأیید مدیر فعال می‌شود و می‌توانید وارد شوید.','success');return;}
+      showMsg(r.body.message||'خطایی رخ داد.','error');
+    }).catch(function(){btn.disabled=false;btn.textContent='ثبت‌نام';showMsg('ارتباط با سرور برقرار نشد.','error');});
+  });
+})();
+</script>
+</body>
+</html>
