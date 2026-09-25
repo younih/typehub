@@ -1,5 +1,5 @@
 /* TypeHub Service Worker — آفلاین (فقط فایل‌های استاتیک؛ هرگز /api/ کش نمی‌شود) */
-const CACHE = 'typehub-v2';
+const CACHE = 'typehub-v3';
 const FILES = [
   './', './index.html', './app.html', './admin.html',
   './css/style.css',
