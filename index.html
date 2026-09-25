@@ -81,7 +81,7 @@
   function showMsg(text,kind){msg.textContent=text;msg.className='msg show '+kind;}
   function hideMsg(){msg.className='msg';}
   function api(path,method,body){
-    return fetch(path,{method:method||'GET',headers:{'Content-Type':'application/json'},
+    return fetch(path,{method:method||'GET',headers:{'Content-Type':'application/json'},credentials:'same-origin',
       body:body?JSON.stringify(body):undefined}).then(function(r){return r.json().then(function(j){return {status:r.status,body:j};});});
   }
   function goPanel(role){location.replace(role==='admin'?'/admin.html':'/app.html');}
