@@ -1,9 +1,9 @@
 /* TypeHub Service Worker — آفلاین (فقط فایل‌های استاتیک؛ هرگز /api/ کش نمی‌شود) */
-const CACHE = 'typehub-v4';
+const CACHE = 'typehub-v5';
 const FILES = [
   './', './index.html', './app.html', './admin.html',
-  './css/style.css?v=4',
-  './js/content.js?v=4', './js/engine.js?v=4', './js/app.js?v=4', './js/auth.js?v=4',
+  './css/style.css?v=5',
+  './js/content.js?v=5', './js/engine.js?v=5', './js/app.js?v=5', './js/auth.js?v=5',
   './manifest.json', './icons/icon.svg'
 ];
 self.addEventListener('install', (e) => {
