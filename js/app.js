@@ -502,7 +502,7 @@ function finishItem() {
   rawTargets.forEach((tw) => {
     const d = r.detail.find(x => Engine.normWord(x.target) === Engine.normWord(tw));
     const w = document.createElement('div');
-    w.className = 'pword' + (d && !d.ok ? ' bad' : '');
+    w.className = 'rword' + (d && !d.ok ? ' bad' : '');
     const fa = wordFa(item, Engine.normWord(tw));
     w.innerHTML = `<span class="en">${tw}</span>` +
       (d && !d.ok ? `<span class="typed">✗ ${d.typed || '—'}</span>` : '') +
