@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>TypeHub | تایپ‌هاب — انگلیسی با دیکته و تایپ</title>
 <meta name="description" content="یادگیری انگلیسی از صفر با مدل شنیدار + تایپ: گوش بده، تایپ کن، نمره بگیر">
 <meta name="theme-color" content="#0f172a">
@@ -15,22 +15,30 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TypeHub">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 <div id="app">
 
   <!-- ===== هدر ===== -->
   <header id="topbar">
+   <div class="topbar-inner">
     <div class="brand" data-nav="home">
       <span class="brand-logo">⌨️</span>
       <span class="brand-name">تایپ‌هاب</span>
     </div>
+    <nav class="topnav">
+      <button data-nav="home" class="tnav active">🏠 خانه</button>
+      <button data-nav="levels" class="tnav">🎚 سطح‌ها</button>
+      <button data-nav="review" class="tnav">📝 مرور</button>
+      <button data-nav="stats" class="tnav">📊 آمار</button>
+    </nav>
     <div class="top-stats">
       <span class="pill" id="pill-xp" title="امتیاز">⭐ <b>0</b></span>
       <span class="pill" id="pill-streak" title="استریک روزانه">🔥 <b>0</b></span>
       <span id="auth-area"></span>
     </div>
+   </div>
   </header>
 
   <!-- ===== بنر مهمان ===== -->
@@ -42,8 +50,10 @@
   <!-- ===== صفحه خانه ===== -->
   <section id="screen-home" class="screen active">
     <div class="hero">
+     <div class="hero-text">
       <h1>انگلیسی رو با <span class="hl">گوش</span> و <span class="hl">تایپ</span> یاد بگیر</h1>
       <p class="sub">از صفرِ صفر: اول الفبا، بعد کلمه، بعد جمله. صدا رو گوش بده، همزمان تایپ کن، نمره بگیر.</p>
+     </div>
       <div class="hero-row">
         <div class="goal-ring" title="هدف روزانه">
           <svg viewBox="0 0 80 80" class="ring-svg">
@@ -205,10 +215,10 @@
   </nav>
 </div>
 
-<script src="js/content.js?v=4"></script>
-<script src="js/engine.js?v=4"></script>
-<script src="js/auth.js?v=4"></script>
-<script src="js/app.js?v=4"></script>
+<script src="js/content.js?v=5"></script>
+<script src="js/engine.js?v=5"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/app.js?v=5"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
