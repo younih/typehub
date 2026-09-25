@@ -123,15 +123,6 @@ input,textarea{font-family:inherit}
   pointer-events:none;
 }
 .demo-title{font-weight:800;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px;position:relative}
-.demo-words{display:flex;gap:10px;justify-content:center;margin-bottom:16px;position:relative;flex-wrap:wrap}
-.demo-word{
-  font-family:var(--font-en);font-size:26px;font-weight:600;direction:ltr;
-  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
-  border-radius:12px;padding:8px 18px;min-width:110px;text-align:center;
-}
-.demo-word.done{border-color:rgba(34,197,94,.7);color:#86efac}
-.demo-word.spoken{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.28)}
-.demo-word .caret{display:inline-block;width:2px;height:1.1em;background:var(--coral);vertical-align:-3px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 .demo-play{
   position:relative;display:inline-flex;align-items:center;gap:8px;
@@ -301,47 +292,109 @@ input,textarea{font-family:inherit}
 }
 .btn-slow.on{background:rgba(255,106,92,.22);border-color:var(--coral);color:#ffb3ab}
 
-/* اسلات‌های کلمه */
-.word-slots{
-  display:flex;flex-wrap:wrap;gap:9px;justify-content:center;direction:ltr;
-  margin-bottom:6px;position:relative;min-height:56px;align-items:center;
+/* ردیف آمار نشست تمرین */
+.psess{
+  display:flex;gap:20px;justify-content:center;align-items:center;
+  margin:2px 0 12px;font-size:13px;color:var(--muted);
 }
-.slot{
-  font-family:var(--font-en);font-size:21px;font-weight:600;direction:ltr;
-  padding:7px 15px;border-radius:11px;min-width:52px;text-align:center;
-  background:rgba(255,255,255,.06);
-  border:1.5px dashed rgba(255,255,255,.22);
-  color:rgba(232,237,247,.42);
-  transition:all .18s;position:relative;
-}
-.slot.cur{
-  background:#fff;color:var(--navy-deep);border:1.5px solid #fff;
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
-}
-.slot.cur::after{
-  content:'';position:absolute;right:9px;top:50%;transform:translateY(-50%);
-  width:2.5px;height:1.15em;background:var(--coral);border-radius:2px;
-  animation:blink 1s steps(1) infinite;
-}
-.slot.ok{background:rgba(34,197,94,.16);border:1.5px solid rgba(34,197,94,.65);color:#86efac}
-.slot.bad{background:rgba(239,68,68,.16);border:1.5px solid rgba(239,68,68,.7);color:#fca5a5}
-.slot.spoken{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.25)}
-.slot.ok.spoken{box-shadow:0 0 0 3px rgba(34,197,94,.35)}
-.slot.pop{animation:slotPop .3s ease}
-@keyframes slotPop{40%{transform:translateY(-5px) scale(1.06)}}
+.psess-item b{color:var(--ink);font-variant-numeric:tabular-nums;font-size:13.5px}
 
-/* کادر نوشتن */
-.type-wrap{margin:2px 0 12px}
-.type-input{
-  width:100%;border:2px solid var(--line);background:var(--card);
-  border-radius:16px;padding:15px 18px;
-  font-family:var(--font-en);font-size:21px;font-weight:500;direction:ltr;text-align:left;
-  color:var(--ink);box-shadow:var(--shadow-sm);
-  transition:border-color .15s,box-shadow .15s;
+/* خط راهنما: حرف اول + نقطه */
+.hint-line{
+  display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;direction:ltr;
+  margin:2px 0 14px;position:relative;min-height:28px;align-items:center;
 }
-.type-input::placeholder{font-family:var(--font-fa);font-size:14px;color:var(--faint);text-align:right}
-.type-input:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 4px rgba(255,106,92,.14)}
-.type-input.auto-ok{border-color:var(--ok);box-shadow:0 0 0 4px rgba(34,197,94,.14);background:var(--ok-soft)}
+.hh{
+  font-family:var(--font-en);font-size:19px;letter-spacing:2px;white-space:nowrap;
+  color:#7e8cb3;direction:ltr;
+}
+.hh b{color:#d7e0f5;font-weight:700}
+
+/* جاهای خالی دیکته */
+.blank-row{
+  display:flex;flex-wrap:wrap;gap:10px 14px;justify-content:center;direction:ltr;
+  margin-bottom:8px;position:relative;min-height:58px;align-items:flex-end;
+}
+.blank-row.shake{animation:shk .35s ease}
+.blank{
+  background:transparent;border:none;border-bottom:3px solid rgba(255,255,255,.38);
+  border-radius:0;color:#fff;
+  font-family:var(--font-en);font-size:25px;font-weight:600;
+  text-align:center;padding:6px 4px;direction:ltr;
+  caret-color:var(--coral);
+  transition:border-color .15s,background .15s;
+}
+.blank:focus{outline:none}
+.blank.cur{border-bottom-color:var(--coral);background:rgba(255,255,255,.08)}
+.blank.filled{border-bottom-color:rgba(255,255,255,.75)}
+.blank.shk{animation:shk .3s ease;border-bottom-color:var(--bad)}
+.blank-note{
+  font-size:11.5px;color:var(--navy-muted);text-align:center;position:relative;line-height:1.9;
+}
+
+/* دکمه‌های ابزار تمرین */
+.tool-btns{display:flex;gap:8px}
+.tool-btn{
+  font-size:12.5px;font-weight:800;color:var(--muted);
+  background:var(--card);border:1.5px solid var(--line);border-radius:999px;
+  padding:7px 15px;box-shadow:var(--shadow-sm);transition:all .15s;
+}
+.tool-btn:active{transform:scale(.96)}
+.tool-btn.used{opacity:.45;border-style:dashed}
+
+/* جشن Perfect */
+.perfect-ribbon{position:relative;margin:4px 0 12px;padding:20px 10px 12px;overflow:hidden}
+.pf-big{
+  font-size:36px;font-weight:900;letter-spacing:.5px;
+  background:linear-gradient(90deg,#f59e0b,#ff6a5c,#f59e0b);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:pfPop .55s cubic-bezier(.2,1.6,.4,1);
+}
+@keyframes pfPop{from{transform:scale(.4);opacity:0}}
+.pf-sub{font-size:14px;font-weight:800;color:#b45309;margin-top:4px}
+.pf-conf i{
+  position:absolute;top:-10px;width:8px;height:13px;border-radius:2px;opacity:.95;
+  animation:confFall 1.7s ease-in forwards;
+}
+.pf-conf i:nth-child(3n){background:#ff6a5c}
+.pf-conf i:nth-child(3n+1){background:#f59e0b}
+.pf-conf i:nth-child(3n+2){background:#22c55e}
+.pf-conf i:nth-child(1){left:6%}.pf-conf i:nth-child(2){left:14%;animation-delay:.15s}
+.pf-conf i:nth-child(3){left:22%;animation-delay:.3s}.pf-conf i:nth-child(4){left:30%}
+.pf-conf i:nth-child(5){left:38%;animation-delay:.2s}.pf-conf i:nth-child(6){left:46%;animation-delay:.45s}
+.pf-conf i:nth-child(7){left:54%}.pf-conf i:nth-child(8){left:62%;animation-delay:.1s}
+.pf-conf i:nth-child(9){left:70%;animation-delay:.35s}.pf-conf i:nth-child(10){left:78%}
+.pf-conf i:nth-child(11){left:86%;animation-delay:.25s}.pf-conf i:nth-child(12){left:93%;animation-delay:.5s}
+.pf-conf i:nth-child(13){left:48%;animation-delay:.6s}.pf-conf i:nth-child(14){left:18%;animation-delay:.55s}
+@keyframes confFall{to{transform:translateY(200px) rotate(560deg);opacity:0}}
+
+/* کارت کلمه در نتیجه */
+.pcard{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:20px 16px 14px;margin-bottom:14px;
+}
+.pwords{display:flex;flex-wrap:wrap;gap:12px 18px;justify-content:center;direction:ltr;margin-bottom:12px}
+.pword{display:flex;flex-direction:column;align-items:center;min-width:54px}
+.pword .en{
+  font-family:var(--font-en);font-size:22px;font-weight:700;direction:ltr;
+  border-bottom:2.5px solid var(--line);padding-bottom:3px;
+}
+.pword.bad .en{color:var(--bad);border-bottom-color:var(--bad)}
+.pword .typed{font-family:var(--font-en);font-size:12px;color:var(--bad);direction:ltr;margin-top:2px}
+.pword .fa{font-size:12px;color:var(--muted);margin-top:3px}
+.pfa{
+  text-align:center;font-size:13.5px;color:var(--muted);
+  border-top:1px dashed var(--line);padding-top:10px;
+}
+.result-tip{text-align:center;font-size:12px;color:var(--faint);margin-top:4px}
+
+/* دموی خانه: مدل جای خالی */
+.demo-hintline{
+  font-family:var(--font-en);font-size:20px;letter-spacing:3px;
+  color:#8f9cc0;margin-bottom:12px;position:relative;
+}
+.demo-blanks{display:flex;gap:14px;justify-content:center;margin-bottom:18px;position:relative}
+.demo-blank{width:104px;height:36px;border-bottom:3px solid rgba(255,255,255,.42)}
 
 /* کیبورد روی صفحه */
 .kb-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -353,13 +406,6 @@ input,textarea{font-family:inherit}
 .kb-toggle.on{color:var(--coral-dark);border-color:var(--coral);background:var(--coral-soft)}
 .live-line{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
 .live-line b{color:var(--ink);font-variant-numeric:tabular-nums}
-.combo{
-  display:inline-flex;align-items:center;gap:5px;
-  background:#fff7e8;border:1px solid #f3d9a4;color:#b45309;
-  font-size:12.5px;font-weight:800;border-radius:999px;padding:4px 13px;
-}
-.combo.pop{animation:slotPop .3s ease}
-.combo.shake{animation:shk .3s ease}
 @keyframes shk{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .osk{
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
