@@ -18,7 +18,7 @@ const Engine = (() => {
       || en[0];
     return pref || null;
   }
-  function speak(text, { slow = false, onend = null } = {}) {
+  function speak(text, { slow = false, rate = null, onend = null } = {}) {
     return new Promise((resolve) => {
       if (!('speechSynthesis' in window)) { resolve(); return; }
       speechSynthesis.cancel();
@@ -26,7 +26,7 @@ const Engine = (() => {
       const v = pickVoice();
       if (v) u.voice = v;
       u.lang = 'en-US';
-      u.rate = slow ? 0.6 : 0.92;
+      u.rate = rate != null ? rate : (slow ? 0.75 : 0.92);
       u.pitch = 1;
       let done = false;
       const fin = () => { if (!done) { done = true; resolve(); } };
